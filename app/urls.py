@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import view_provider_page
+from . import views
 
 urlpatterns = [
-    path('provider/', view_provider_page, name="lista_productos")
+    path('provider/', views.view_provider_page, name="lista_productos"),
+    path('',views.home_page, name="index")
 ]
