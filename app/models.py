@@ -23,6 +23,8 @@ class Cajero(models.Model):
     idCajero = models.IntegerField(primary_key=True)
     nombreCajero = models.CharField(max_length=100)
     salario = models.FloatField(max_length=11)
+    correo = models.EmailField(max_length=100, default=None)
+    password = models.CharField(max_length=50, default=None)
 
 class Factura(models.Model):
     idFactura = models.IntegerField(primary_key=True)
@@ -40,3 +42,8 @@ class Compra(models.Model):
     total = models.FloatField(null=False)
     utilidad = models.FloatField(null=False)
     idFactura = models.ForeignKey(Factura, on_delete=models.CASCADE)
+
+class admin(models.Model):
+    id = models.IntegerField(primary_key=True)
+    email = models.EmailField(max_length=50)
+    password = models.CharField(max_length=50)
