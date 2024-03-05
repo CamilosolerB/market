@@ -57,10 +57,8 @@ def create_admin(request):
             post = request.POST
             email = post.get('email')
             password = post.get('password')
-            admin = models.admin.objects.create(email=email)
             clave = make_password(password)
-            admin.password = clave
-            admin.save()
+            admin = models.admin.objects.create(email=email, password=clave)
             return redirect('/admin/admins')
         else:
             return redirect('/admin/')
