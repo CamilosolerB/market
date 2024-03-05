@@ -1,0 +1,79 @@
+{% extends 'dashboard.html'%}
+
+{% block title %}
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">InvenSoft</div>
+    </a>        
+{% endblock %}
+{% block sidebar %}
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Producto
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/admins/">
+            <i class="fa-solid fa-user-tie"></i> Administradores
+        </a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link collapsed" href="/admin/cashiers/">
+            <i class="fa-solid fa-cash-register"></i> Cajeros
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/providers/">
+            <i class="fa-solid fa-truck"></i> Proveedores
+        </a>
+    </li>        
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-4 card">
+        <h1 class="container text-center"> Crear cajero</h1>
+        <form action="" method="post" class="">
+            <label for="">Nombre</label>
+            <input type="text" name="nombre" id="" class="form-control">
+            <label for="">Salario</label>
+            <input type="number" name="salario" id="" class="form-control">
+            <label for="">Correo</label>
+            <input type="email" name="correo" id="" class="form-control">
+            <label for="">Contraseña</label>
+            <input type="password" name="password">
+            <button type="submit" class="btn btn-primary">Registrar</button>
+        </form>
+    </div>
+    <div class="col-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Salario</th>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in data %}
+                <tr>
+                    <th>{{ data.idCajero }}</th>
+                    <td>{{ data.nombreCajero }}</td>
+                    <td>{{ data.salario}}</td>
+                    <td>{{ data.correo}}</td>
+                    <td> 
+                        <button class="btn btn-danger" onclick="deleteNote({{ data.idCajero }}, '{{ csrf_token }}', 'cashier')"><i class="fa-solid fa-trash"></i></button>
+                        <a href="" class="btn btn-primary"><i class="fa-regular fa-pen-to-square"></i></a>
+                    </td>
+                </tr>
+                {% endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
