@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from .. import models
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.hashers import make_password
+import openpyxl
 
 def home_page_admin(request):
     if request.session.get('admin'):
@@ -69,6 +70,31 @@ def create_cashier(request):
     if request.session.get('admin'):
         if request.method == 'POST':
             post = request.POST
+            nombre = post.get('nombre')
+            salario = post.get('salario')
+            correo = post.get('correo')
+            password = post.get('password')
+            password = make_password(password)
+            models.Cajero.objects.create(nombreCajero = nombre, salario = salario,
+                                          correo = correo, password = password)
+            return redirect('/admin/cashiers')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
+            
+def create_provider(request):
+    if request.session.get('admin'):
+        if request.method == 'POST':
+            post = request.POST
+            nit = post.get('nit')
+            nombre = post.get('nombre')
+            models.Proveedor.objects.create(nitProvider=nit, nomProvider = nombre)
+            return redirect('/admin/providers')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
 
     
 def delete_admin(request, id):
@@ -97,3 +123,36 @@ def delete_cashier(request, id):
             return JsonResponse({'mensaje': 'Cajero eliminado correctamente'})
         except models.admin.DoesNotExist:
             return JsonResponse({'error': 'No se pudo eliminar el cajero.'}, status=404)
+        
+def delete_provider(request, id):
+    if request.session.get('admin'):
+        try:
+            provider = models.Proveedor.objects.get(nitProvider=id)
+            provider.delete()
+            return JsonResponse({'mensaje': 'Cajero eliminado correctamente'})
+        except models.admin.DoesNotExist:
+            return JsonResponse({'error': 'No se pudo eliminar el cajero.'}, status=404)
+        
+def generate_excel_product(request):
+    products = models.Producto.objects.all()
+    wb = openpyxl.Workbook()
+    hoja1 = wb.create_sheet("Productos")
+    hoja1.append(('ID', 'Nombre', 'Precio', 'IVA', 'Stock', 'NIT','Nombre Compañia'))
+    for product in products:
+        product_data = [
+            product.idProducto,
+            product.nombreProducto,
+            product.precioCompra,
+            product.ivaProducto,
+            product.stockProducto,
+            product.nitProveedor.nitProvider,
+            product.nitProveedor.nomProvider
+        ]
+        hoja1.append(product_data)
+
+    # Guardar el libro de Excel en la respuesta HTTP para descargar
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=productos.xlsx'
+    wb.save(response)
+
+    return response

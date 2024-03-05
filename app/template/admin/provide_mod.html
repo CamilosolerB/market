@@ -36,55 +36,35 @@
 <div class="row">
     <div class="col-4 card">
         <h1 class="container text-center"> Ingresar Proveedor</h1>
-        <form action="" method="post" class="">
-            <label for="">Nombre</label>
-            <input type="text" name="" id="" class="form-control">
-            <label for="">Precio Compra</label>
-            <input type="number" name="" id="" class="form-control">
-            <label for="">Cantidad</label>
-            <input type="number" name="" id="" class="form-control">
-            <label for="">Proveedor</label>
-            <div class="input-group mb-3">
-                <label class="input-group-text" for="inputGroupSelect01">Options</label>
-                <select class="form-select" id="inputGroupSelect01">
-                  <option selected>Choose...</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div>
+        <form action="/admin/create_provider/" method="post" class="">
+            {% csrf_token %}
+            <label for="">Nit Empresa</label>
+            <input type="number" name="nit" id="" class="form-control">
+            <label for="">Nombre Empresa</label>
+            <input type="text" name="nombre" id="" class="form-control">
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
     </div>
     <div class="col-8">
-        <button type="button" class="btn btn-success">Generar inventario Excel</button>
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
+                    <th scope="col">Nit</th>
+                    <th scope="col">Nombre compañia</th>
+                    <th scope="col">Opciones</th>
                 </tr>
             </thead>
             <tbody>
+                {% for data in data %}
                 <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
+                    <th>{{ data.nitProvider}}</th>
+                    <td>{{ data.nomProvider }}</td>
+                    <td> 
+                        <button class="btn btn-danger" onclick="deleteNote({{ data.nitProvider}}, '{{ csrf_token }}', 'provider')"><i class="fa-solid fa-trash"></i></button>
+                        <a href="" class="btn btn-primary"><i class="fa-regular fa-pen-to-square"></i></a>
+                    </td>
                 </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

@@ -9,7 +9,10 @@ urlpatterns = [
     path('create_product/', view_admin.create_product),
     path('create_admin/', view_admin.create_admin),
     path('create_cashier/', view_admin.create_cashier),
+    path('create_provider/', view_admin.create_provider),
     path('delete_product/<int:id>', view_admin.delete_product),
     path('delete_admin/<int:id>', view_admin.delete_admin),
-    path('delete_cashier/<int:id>', view_admin.delete_cashier)
+    path('delete_cashier/<int:id>', view_admin.delete_cashier),
+    path('delete_provider/<int:id>', view_admin.delete_provider),
+    path('generate_excel/',view_admin.generate_excel_product)
 ]#
