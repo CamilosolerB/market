@@ -1,0 +1,99 @@
+{% extends 'dashboard.html'%}
+
+{% block title %}
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">InvenSoft</div>
+    </a>        
+{% endblock %}
+{% block sidebar %}
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Producto
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/admins/">
+            <i class="fa-solid fa-user-tie"></i> Administradores
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/cashiers/">
+            <i class="fa-solid fa-cash-register"></i> Cajeros
+        </a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link collapsed" href="/admin/providers/">
+            <i class="fa-solid fa-truck"></i> Proveedores
+        </a>
+    </li>        
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-4 card">
+        <h1 class="container text-center"> Ingresar Proveedor</h1>
+        <form action="/admin/create_provider/" method="post" class="">
+            {% csrf_token %}
+            <label for="">Nit Empresa</label>
+            <input type="number" name="nit" id="" class="form-control">
+            <label for="">Nombre Empresa</label>
+            <input type="text" name="nombre" id="" class="form-control">
+            <button type="submit" class="btn btn-primary">Registrar</button>
+        </form>
+    </div>
+    <div class="col-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Nit</th>
+                    <th scope="col">Nombre compañia</th>
+                    <th scope="col">Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in data %}
+                <tr>
+                    <th>{{ data.nitProvider}}</th>
+                    <td>{{ data.nomProvider }}</td>
+                    <td> 
+                        <button class="btn btn-danger" onclick="deleteNote({{ data.nitProvider}}, '{{ csrf_token }}', 'provider')"><i class="fa-solid fa-trash"></i></button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{ data.nitProvider}}">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                    </td>
+                </tr>
+                <div class="modal fade" id="exampleModal{{ data.nitProvider}}" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <form action="/admin/update_provider/" method="post" class="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    {% csrf_token %}
+                                    <label for="">Nit Empresa</label>
+                                    <input type="number" name="nit" id="" class="form-control" value="{{ data.nitProvider}}">
+                                    <label for="">Nombre Empresa</label>
+                                    <input type="text" name="nombre" id="" class="form-control" value="{{ data.nomProvider }}">                        
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
