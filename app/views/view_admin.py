@@ -3,6 +3,7 @@ from .. import models
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.hashers import make_password
 import openpyxl
+#
 
 def home_page_admin(request):
     if request.session.get('admin'):
