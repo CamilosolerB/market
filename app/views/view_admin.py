@@ -96,6 +96,73 @@ def create_provider(request):
             return redirect('/admin/')
     else:
         return redirect('/')
+    
+def update_product(request):
+    if request.session.get('admin'):
+        if request.method == 'POST':
+            post = request.POST
+            modelo = models.Producto()
+            modelo.idProducto = post.get('id')
+            modelo.nombreProducto = post.get('nombre')
+            modelo.precioCompra = post.get('precio')
+            modelo.stockProducto = post.get('cantidad')
+            modelo.ivaProducto = float(post.get('iva'))
+            idprovider = post.get('provider')
+            modelo.nitProveedor = models.Proveedor.objects.get(nitProvider=idprovider)
+            modelo.save()
+            return redirect('/admin/')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
+
+def update_admin(request):
+    if request.session.get('admin'):
+        if request.method == 'POST':
+            post = request.POST
+            modelo = models.admin()
+            modelo.id = post.get('id')
+            modelo.email = post.get('email')
+            password = post.get('password')
+            modelo.password = make_password(password)
+            modelo.save()
+            return redirect('/admin/admins')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
+
+def update_cashier(request):
+    if request.session.get('admin'):
+        if request.method == 'POST':
+            post = request.POST
+            modelo = models.Cajero()
+            modelo.idCajero = post.get('id')
+            modelo.nombreCajero = post.get('nombre')
+            modelo.salario = post.get('salario')
+            modelo.correo = post.get('correo')
+            password = post.get('password')
+            modelo.password = make_password(password)
+            modelo.save()
+            return redirect('/admin/cashiers')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
+
+def update_provider(request):
+    if request.session.get('admin'):
+        if request.method == 'POST':
+            post = request.POST
+            modelo = models.Proveedor()
+            modelo.nitProvider = post.get('nit')
+            modelo.nomProvider = post.get('nombre')
+            modelo.save()
+            return redirect('/admin/providers')
+        else:
+            return redirect('/admin/')
+    else:
+        return redirect('/')
 
     
 def delete_admin(request, id):
