@@ -43,7 +43,33 @@
             <label for="">Precio Compra</label>
             <input type="number" name="precio" id="" class="form-control">
             <label for="">Cantidad</label>
-            <input type="number" name="cantidad" id="" class="form-control">
+            <div class="input-group mb-3">
+                <input type="number" class="form-control" name="cantidad" placeholder="Ingrese su texto aquí"
+                    aria-label="Ingrese su texto aquí" aria-describedby="basic-addon2">
+                <select class="form-select" id="inputGroupSelect02" name="unidad">
+                    <optgroup label="Peso">
+                        <option value="kg">Kilogramos</option>
+                        <option value="g">Gramos</option>
+                        <option value="lib">Libras</option>
+                    </optgroup>
+                    <optgroup label="Volumen">
+                        <option value="lit">Litros</option>
+                        <option value="cm3">Centimetros cubicos</option>
+                        <option value="gal">Galones</option>
+                    </optgroup>
+                    <optgroup label="Otras">
+                        <option value="uni">Unidades</option>
+                        <option value="ca">Cajas</option>
+                        <option value="doc">Docenas</option>
+                    </optgroup>
+                    <optgroup label="longitud">
+                        <option value="mt">Metro</option>
+                        <option value="ft">Pies</option>
+                        <option value="cm">Centimetros</option>
+                        <option value="Pul">Pulgadas</option>
+                    </optgroup>
+                </select>
+            </div>
             <label for="">Porcentaje de iva</label>
             <input type="number" name="iva" id="" class="form-control">
             <label for="">Proveedor</label>
@@ -82,13 +108,14 @@
                     <td>{{ data.nombreProducto}}</td>
                     <td>{{ data.precioCompra}}</td>
                     <td>{{ data.ivaProducto|floatformat:"2" }} %</td>
-                    <td>{{ data.stockProducto}}</td>
+                    <td>{{ data.stockProducto}} {{ data.unidadMedidad }}</td>
                     <td>{{ data.nitProveedor.nitProvider}}</td>
                     <td>
                         <button class="btn btn-danger"
                             onclick="deleteNote({{ data.idProducto}},'{{ csrf_token }}','product' )"><i
                                 class="fa-solid fa-trash"></i></button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{ data.idProducto }}">
+                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                            data-target="#exampleModal{{ data.idProducto }}">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
                     </td>
@@ -115,8 +142,35 @@
                                     <input type="number" name="precio" id="" class="form-control"
                                         value="{{ data.precioCompra}}">
                                     <label for="">Cantidad</label>
-                                    <input type="number" name="cantidad" id="" class="form-control"
-                                        value="{{ data.stockProducto}}">
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" value="{{ data.stockProducto}}"
+                                            name="cantidad" placeholder="Ingrese su texto aquí"
+                                            aria-label="Ingrese su texto aquí" aria-describedby="basic-addon2">
+                                        <select class="form-select" id="inputGroupSelect02" name="unidad">
+                                            <optgroup label="Peso">
+                                                <option value="kg">Kilogramos</option>
+                                                <option value="g">Gramos</option>
+                                                <option value="lib">Libras</option>
+                                            </optgroup>
+                                            <optgroup label="Volumen">
+                                                <option value="lit">Litros</option>
+                                                <option value="cm3">Centimetros cubicos</option>
+                                                <option value="gal">Galones</option>
+                                            </optgroup>
+                                            <optgroup label="Otras">
+                                                <option value="uni">Unidades</option>
+                                                <option value="ca">Cajas</option>
+                                                <option value="doc">Docenas</option>
+                                            </optgroup>
+                                            <optgroup label="longitud">
+                                                <option value="mt">Metro</option>
+                                                <option value="ft">Pies</option>
+                                                <option value="cm">Centimetros</option>
+                                                <option value="Pul">Pulgadas</option>
+                                            </optgroup>
+                                        </select>
+                                        </select>
+                                    </div>
                                     <label for="">Porcentaje de iva</label>
                                     <input type="number" name="iva" id="" class="form-control"
                                         value="{{ data.ivaProducto|floatformat:" 2" }}">

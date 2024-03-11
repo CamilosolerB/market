@@ -8,30 +8,30 @@ def home_page_admin(request):
     if request.session.get('admin'):
         providers = models.Proveedor.objects.all()
         product = models.Producto.objects.all()
-        return render(request,'./admin/home_admin.html', {'data': product, 'providers': providers})
+        return render(request,'./admin/home_admin.html', {'data': product, 'providers': providers, 'color': 'primary'})
     else:
-        return redirect('/')
+        return redirect('/singout/')
 
 def provider_page(request):
     if request.session.get('admin'):
         provider = models.Proveedor.objects.all()
-        return render(request, './admin/provide_mod.html', {'data': provider})
+        return render(request, './admin/provide_mod.html', {'data': provider, 'color': 'primary'})
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def admin_interface(request):
     if request.session.get('admin'):
         admin = models.admin.objects.all()
-        return render(request, './admin/admin_mod.html', {'admin': admin})
+        return render(request, './admin/admin_mod.html', {'admin': admin, 'color': 'primary'})
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def cashier_admin(request):
     if request.session.get('admin'):
         cashier = models.Cajero.objects.all()
-        return render(request, './admin/cashier_mod.html', {'data': cashier})
+        return render(request, './admin/cashier_mod.html', {'data': cashier, 'color': 'primary'})
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def create_product(request):
     if request.session.get('admin'):
@@ -51,7 +51,7 @@ def create_product(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def create_admin(request):
     if request.session.get('admin'):
@@ -65,7 +65,7 @@ def create_admin(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def create_cashier(request):
     if request.session.get('admin'):
@@ -82,7 +82,7 @@ def create_cashier(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
             
 def create_provider(request):
     if request.session.get('admin'):
@@ -95,7 +95,7 @@ def create_provider(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
     
 def update_product(request):
     if request.session.get('admin'):
@@ -106,6 +106,7 @@ def update_product(request):
             modelo.nombreProducto = post.get('nombre')
             modelo.precioCompra = post.get('precio')
             modelo.stockProducto = post.get('cantidad')
+            modelo.unidadMedidad = post.get('unidad')
             modelo.ivaProducto = float(post.get('iva'))
             idprovider = post.get('provider')
             modelo.nitProveedor = models.Proveedor.objects.get(nitProvider=idprovider)
@@ -114,7 +115,7 @@ def update_product(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
 
 def update_admin(request):
     if request.session.get('admin'):
@@ -130,7 +131,7 @@ def update_admin(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
 
 def update_cashier(request):
     if request.session.get('admin'):
@@ -148,7 +149,7 @@ def update_cashier(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
 
 def update_provider(request):
     if request.session.get('admin'):
@@ -162,7 +163,7 @@ def update_provider(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/')
+        return redirect('/singout/')
 
     
 def delete_admin(request, id):
@@ -173,6 +174,8 @@ def delete_admin(request, id):
             return JsonResponse({'mensaje': 'Administrador eliminado correctamente'})
         except models.admin.DoesNotExist:
             return JsonResponse({'error': 'No se pudo eliminar.'}, status=404)
+    else:
+        return redirect('/singout/')
         
 def delete_product(request, id):
     if request.session.get('admin'):
@@ -182,6 +185,8 @@ def delete_product(request, id):
             return JsonResponse({'mensaje': 'Producto eliminado correctamente'})
         except models.admin.DoesNotExist:
             return JsonResponse({'error': 'No se pudo eliminar este producto.'}, status=404)
+    else:
+        return redirect('/singout/')
         
 def delete_cashier(request, id):
     if request.session.get('admin'):
@@ -191,6 +196,8 @@ def delete_cashier(request, id):
             return JsonResponse({'mensaje': 'Cajero eliminado correctamente'})
         except models.admin.DoesNotExist:
             return JsonResponse({'error': 'No se pudo eliminar el cajero.'}, status=404)
+    else:
+        return redirect('/singout/')
         
 def delete_provider(request, id):
     if request.session.get('admin'):
@@ -200,27 +207,32 @@ def delete_provider(request, id):
             return JsonResponse({'mensaje': 'Cajero eliminado correctamente'})
         except models.admin.DoesNotExist:
             return JsonResponse({'error': 'No se pudo eliminar el cajero.'}, status=404)
-        
+    else:
+        return redirect('/singout/')
+
 def generate_excel_product(request):
-    products = models.Producto.objects.all()
-    wb = openpyxl.Workbook()
-    hoja1 = wb.create_sheet("Productos")
-    hoja1.append(('ID', 'Nombre', 'Precio', 'IVA', 'Stock', 'NIT','Nombre Compañia'))
-    for product in products:
-        product_data = [
-            product.idProducto,
-            product.nombreProducto,
-            product.precioCompra,
-            product.ivaProducto,
-            product.stockProducto,
-            product.nitProveedor.nitProvider,
-            product.nitProveedor.nomProvider
-        ]
-        hoja1.append(product_data)
+    if request.session.get('admin'):
+        products = models.Producto.objects.all()
+        wb = openpyxl.Workbook()
+        hoja1 = wb.create_sheet("Productos")
+        hoja1.append(('ID', 'Nombre', 'Precio', 'IVA', 'Stock', 'NIT','Nombre Compañia'))
+        for product in products:
+            product_data = [
+                product.idProducto,
+                product.nombreProducto,
+                product.precioCompra,
+                product.ivaProducto,
+                product.stockProducto,
+                product.nitProveedor.nitProvider,
+                product.nitProveedor.nomProvider
+            ]
+            hoja1.append(product_data)
 
-    # Guardar el libro de Excel en la respuesta HTTP para descargar
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=productos.xlsx'
-    wb.save(response)
+        # Guardar el libro de Excel en la respuesta HTTP para descargar
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=productos.xlsx'
+        wb.save(response)
 
-    return response
+        return response
+    else:
+            return redirect('/singout/')
