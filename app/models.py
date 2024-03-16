@@ -8,6 +8,7 @@ class Producto(models.Model):
     idProducto = models.IntegerField(primary_key=True)
     nombreProducto = models.CharField(max_length=200)
     precioCompra = models.FloatField(null=True)
+    unidadMedidad = models.CharField(max_length=50)
     ivaProducto = models.FloatField(null=True)
     stockProducto = models.IntegerField(null=True)
     nitProveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
