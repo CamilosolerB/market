@@ -56,13 +56,11 @@ def create_product(request):
             provider = models.Proveedor.objects.get(nitProvider=idprovider)
             models.Producto.objects.create(nombreProducto=nombre, precioCompra=precio, 
                                            ivaProducto=iva, stockProducto=cantidad, unidadMedida = unidad,
-                                           ivaProducto=iva, stockProducto=cantidad, unidadMedida = unidad,
                                            nitProveedor = provider)
             return redirect('/admin/')
         else:
             return redirect('/admin/')
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
     
 def create_admin(request):
