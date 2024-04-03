@@ -26,6 +26,7 @@ class Cajero(models.Model):
     salario = models.FloatField(max_length=11)
     correo = models.EmailField(max_length=100, default=None)
     password = models.CharField(max_length=50, default=None)
+    totalEarning = models.FloatField(max_length=11)
 
 class Factura(models.Model):
     idFactura = models.IntegerField(primary_key=True)
@@ -48,3 +49,11 @@ class admin(models.Model):
     id = models.IntegerField(primary_key=True)
     email = models.EmailField(max_length=50)
     password = models.CharField(max_length=50)
+
+class stats(models.Model):
+    id = models.IntegerField(primary_key=True)
+    sellsOneWeek = models.FloatField(max_length=11)
+    sellsTwoWeek = models.FloatField(max_length=11)
+    sellsThreeWeek = models.FloatField(max_length=11)
+    sellsFourWeek = models.FloatField(max_length=11)
+    bestCashierMonth = models.ForeignKey(Cajero, on_delete=models.CASCADE)

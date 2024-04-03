@@ -7,7 +7,6 @@ from django.contrib.auth.hashers import check_password
 def home_page(request):
     return render(request,'index.html')
 
-@login_required
 def login_validation(request):
     if request.method == 'POST':
         post = request.POST

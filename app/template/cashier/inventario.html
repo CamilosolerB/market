@@ -1,0 +1,56 @@
+{% extends 'dashboard.html'%}
+{% block title %}
+<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/cashier/">
+  <div class="sidebar-brand-icon rotate-n-15">
+    <i class="fas fa-laugh-wink"></i>
+  </div>
+  <div class="sidebar-brand-text mx-3">InvenSoft</div>
+</a>
+{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+  <a class="nav-link" href="/cashier/">
+    <i class="fa-solid fa-cart-shopping"></i>
+    Facturaciòn
+  </a>
+</li>
+<li class="nav-item active">
+  <a class="nav-link collapsed" href="/cashier/products">
+    <i class="fa-solid fa-user-tie"></i> Inventario
+  </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<h1>Inventario productos</h1>
+<table id="tableInventory" class="table table-striped table-bordered" style="width:100%">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Precio de compra</th>
+      <th scope="col">Iva</th>
+      <th scope="col">Stock </th>
+      <th scope="col">NIT Proveedor</th>
+      <th scope="col">Nombre Proveedor</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for data in products %}
+    <tr>
+      <th>{{ data.idProducto}}</th>
+      <td>{{ data.nombreProducto}}</td>
+      <td>{{ data.precioCompra}}</td>
+      <td>{{ data.ivaProducto|floatformat:"2" }} %</td>
+      <td>{{ data.stockProducto}} {{ data.unidadMedidad }}</td>
+      <td>{{ data.nitProveedor.nitProvider}}</td>
+      <td>{{ data.nitProveedor.nomProvider}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+<script>
+  new DataTable('#tableInventory');
+</script>
