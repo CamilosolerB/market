@@ -56,4 +56,6 @@ class stats(models.Model):
     sellsTwoWeek = models.FloatField(max_length=11)
     sellsThreeWeek = models.FloatField(max_length=11)
     sellsFourWeek = models.FloatField(max_length=11)
+    nequi = models.CharField(max_length=255)
+    daviplata = models.CharField(max_length=255)
     bestCashierMonth = models.ForeignKey(Cajero, on_delete=models.CASCADE)

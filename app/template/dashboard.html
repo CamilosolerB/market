@@ -76,7 +76,9 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"> {% block name %}
+            
+                                    {% endblock %} </span>
                                 <img class="img-profile rounded-circle"
                                     src="img/undraw_profile.svg">
                             </a>
@@ -161,9 +163,10 @@
 
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'js/eliminarAdmin.js'%}"></script>
+    <script src="{% static 'js/buscarProducto.js'%}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
+    <script src="{% static 'js/createSell.js' %}"></script>
     <!-- Core plugin JavaScript-->
     <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css">

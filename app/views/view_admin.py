@@ -3,42 +3,43 @@ from .. import models
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.hashers import make_password
 import openpyxl
+from django.core.files.storage import FileSystemStorage
 
 def home_page_admin(request):
     if request.session.get('admin'):
         providers = models.Proveedor.objects.all()
         product = models.Producto.objects.all()
         return render(request,'./admin/home_admin.html', {'data': product, 'providers': providers, 'color': 'primary'})
-        return render(request,'./admin/home_admin.html', {'data': product, 'providers': providers, 'color': 'primary'})
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
 
 def provider_page(request):
     if request.session.get('admin'):
         provider = models.Proveedor.objects.all()
         return render(request, './admin/provide_mod.html', {'data': provider, 'color': 'primary'})
-        return render(request, './admin/provide_mod.html', {'data': provider, 'color': 'primary'})
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
     
 def admin_interface(request):
     if request.session.get('admin'):
         admin = models.admin.objects.all()
         return render(request, './admin/admin_mod.html', {'admin': admin, 'color': 'primary'})
-        return render(request, './admin/admin_mod.html', {'admin': admin, 'color': 'primary'})
+
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
     
 def cashier_admin(request):
     if request.session.get('admin'):
         cashier = models.Cajero.objects.all()
         return render(request, './admin/cashier_mod.html', {'data': cashier, 'color': 'primary'})
-        return render(request, './admin/cashier_mod.html', {'data': cashier, 'color': 'primary'})
     else:
         return redirect('/singout/')
+    
+def qr_admin(request):
+    if request.session.get('admin'):
+        stats = models.stats.objects.all()[0]
+        return render(request, './admin/qr_page.html', {'stats':stats,'color': 'primary'})
+    else:
         return redirect('/singout/')
     
 def create_product(request):
@@ -76,7 +77,6 @@ def create_admin(request):
             return redirect('/admin/')
     else:
         return redirect('/singout/')
-        return redirect('/singout/')
     
 def create_cashier(request):
     if request.session.get('admin'):
@@ -94,7 +94,6 @@ def create_cashier(request):
             return redirect('/admin/')
     else:
         return redirect('/singout/')
-        return redirect('/singout/')
             
 def create_provider(request):
     if request.session.get('admin'):
@@ -107,8 +106,6 @@ def create_provider(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/singout/')
-    
         return redirect('/singout/')
     
 def update_product(request):
@@ -131,7 +128,6 @@ def update_product(request):
             return redirect('/admin/')
     else:
         return redirect('/singout/')
-        return redirect('/singout/')
 
 def update_admin(request):
     if request.session.get('admin'):
@@ -147,7 +143,6 @@ def update_admin(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
 
 def update_cashier(request):
@@ -167,7 +162,6 @@ def update_cashier(request):
             return redirect('/admin/')
     else:
         return redirect('/singout/')
-        return redirect('/singout/')
 
 def update_provider(request):
     if request.session.get('admin'):
@@ -181,7 +175,6 @@ def update_provider(request):
         else:
             return redirect('/admin/')
     else:
-        return redirect('/singout/')
         return redirect('/singout/')
 
     
@@ -274,5 +267,31 @@ def generate_excel_product(request):
         wb.save(response)
 
         return response
+    else:
+        return redirect('/singout/')
+    
+def create_nequi_qr(request):
+    if request.session.get('admin'):
+        qr = models.stats.objects.all()[0]
+        myFile = request.FILES['qrcode']
+        fs = FileSystemStorage()
+        dirfile = 'app/static/img/'+myFile.name
+        filename = fs.save(dirfile, myFile)
+        qr.nequi = '/img/'+myFile.name
+        qr.save()
+        return redirect('/admin/qrpage/')
+    else:
+        return redirect('/singout/')
+    
+def create_nequi_qr(request):
+    if request.session.get('admin'):
+        qr = models.stats.objects.all()[0]
+        myFile = request.FILES['qrcode']
+        fs = FileSystemStorage()
+        dirfile = 'app/static/img/'+myFile.name
+        filename = fs.save(dirfile, myFile)
+        qr.daviplata = '/img/'+myFile.name
+        qr.save()
+        return redirect('/admin/qrpage/')
     else:
         return redirect('/singout/')

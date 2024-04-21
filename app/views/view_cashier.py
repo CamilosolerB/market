@@ -1,12 +1,15 @@
 from django.shortcuts import redirect, render
-from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .. import models
 import json
 
 def cashier_page(request):
     if request.session.get('cajero'):
+        stats = models.stats.objects.all()[0]
         cashier = models.Cajero.objects.get(idCajero = request.session.get('id'))
-        return render(request,'cashier/home_cash.html', {'data': cashier, 'color': 'danger'})
+        return render(request,'cashier/home_cash.html', {'stats':stats,'data': cashier, 'color': 'danger'})
     else: 
         return redirect('/singout/')
     
@@ -18,9 +21,76 @@ def inventory_page(request):
     else: 
         return redirect('/singout/')
     
-def getProductByID(request):
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_product(request):
     if request.session.get('cajero'):
-        print("si")
-    else: 
+        try:
+            data = json.loads(request.body)
+            id = data.get('id')
+            nombre = data.get('nombre')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        if id:
+            product_data = models.Producto.objects.filter(idProducto=id).values()
+        elif nombre:
+            product_data = models.Producto.objects.filter(nombreProducto=nombre).values()
+        else:
+            return JsonResponse({'error': 'No se proporcionó ID o nombre'}, status=400)
+        if not product_data:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+        return JsonResponse(list(product_data), safe=False)
+    else:
+        return redirect('/signout/')
+    
+@require_http_methods(['POST'])
+@csrf_exempt
+def finish_shop(request):
+    if request.session.get('cajero'):
+        data = json.loads(request.body)
+        print(data)
+        client = create_or_update_clients(data.get('cliente'))
+        cashier = models.Cajero.objects.get(idCajero=request.session.get('id'))
+        factura = models.Factura(cedulaCliente=client,idCajero=cashier,totalBruto=data.get('subtotal'),
+                                 subTotal=data.get('total'),totalIva=data.get('iva'))
+        factura.save()
+        list_products = data.get('productos')
+        create_compra(list_products, factura)
+        return JsonResponse({'success': 'Factura generada'})
+    else:
         return redirect('/singout/')
     
+def create_compra(lista, factura):
+    for i in range(len(lista)):
+        product = models.Producto.objects.get(idProducto=lista[i][0])
+        quantity = lista[i][4]
+        total = lista[i][5]
+        utilidad = float(lista[i][5]) - float(lista[i][2])
+        compra = models.Compra(idProducto=product, cantidad=quantity, total=total, utilidad=utilidad, idFactura=factura)
+        compra.save()
+def create_or_update_clients(cliente):
+    try:
+        client = models.Cliente.objects.get(cedula=cliente[0])
+        client.nombreCliente = cliente[1]
+        client.numeroCompras += 1
+        client.correo = cliente[2]
+        client.telefono = cliente[3]
+        client.save()
+    except models.Cliente.DoesNotExist:
+        client = models.Cliente(cedula=cliente[0], nombreCliente=cliente[1], numeroCompras=1, correo=cliente[2], telefono=cliente[3])
+        client.save()
+    return client
+    
+@require_http_methods(['POST'])
+@csrf_exempt
+def search_client(request):
+    if request.session.get('cajero'):
+        data = json.loads(request.body)
+        dni = data.get('dni');
+        client = models.Cliente.objects.filter(cedula=dni).values()
+        if not client:
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+        else:
+            return JsonResponse(list(client), safe=False)
+    else:
+        return redirect('/singout/')
