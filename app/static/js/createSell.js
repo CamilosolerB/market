@@ -29,7 +29,6 @@ function fillData(data) {
 
 async function generateSale() {
     const sale = obtenerDatosTabla();
-    console.log(sale);
     client[0] = document.getElementById("cedula").value;
     client[1] = document.getElementById("name").value;
     client[2] = document.getElementById("email").value;
@@ -50,7 +49,13 @@ async function generateSale() {
             body: JSON.stringify(data)
         })
         if (response.ok) {
-
+            cerrarModal("clientModal");
+            const responseData = await response.json();
+            const link = responseData.link;
+            const baseUrl = window.location.origin;
+            const fullUrl = baseUrl + link;
+            console.log(fullUrl);
+            window.open(fullUrl, '_blank');
         }
     } catch (error) {
         console.error(error);
@@ -77,7 +82,6 @@ function obtenerDatosTabla() {
     }
     return datosTabla;
 }
-console.log(opcion1)
 function validateModalToShow() {
     if (opcion1.checked) {
         const modal1 = document.getElementById("clientModal");
@@ -101,7 +105,7 @@ function validateModalToShow() {
     }
 }
 
-function changeClientModal(modalId){
+function changeClientModal(modalId) {
     cerrarModal(modalId);
     opcion1.checked = true;
     validateModalToShow();
@@ -113,7 +117,7 @@ function cerrarModal(modalId) {
     modal.classList.add('hide');
     modal.classList.add('d-none');
 }
-  
+
 
 //buscar Cliente
 let btnClient = document.getElementById('btnClient');

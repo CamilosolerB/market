@@ -35,6 +35,7 @@ class Factura(models.Model):
     totalBruto = models.FloatField(null=False)
     totalIva = models.FloatField(null=False)
     subTotal = models.FloatField(null=False)
+    link = models.CharField(max_length=255)
     day = models.DateTimeField(auto_now_add=True)
 
 class Compra(models.Model):

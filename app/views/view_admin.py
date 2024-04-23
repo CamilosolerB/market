@@ -56,7 +56,7 @@ def create_product(request):
             idprovider = post.get('provider')
             provider = models.Proveedor.objects.get(nitProvider=idprovider)
             models.Producto.objects.create(nombreProducto=nombre, precioCompra=precio, 
-                                           ivaProducto=iva, stockProducto=cantidad, unidadMedida = unidad,
+                                           ivaProducto=iva, stockProducto=cantidad, unidadMedidad = unidad,
                                            nitProveedor = provider)
             return redirect('/admin/')
         else:
@@ -283,7 +283,7 @@ def create_nequi_qr(request):
     else:
         return redirect('/singout/')
     
-def create_nequi_qr(request):
+def create_daviplata_qr(request):
     if request.session.get('admin'):
         qr = models.stats.objects.all()[0]
         myFile = request.FILES['qrcode']
