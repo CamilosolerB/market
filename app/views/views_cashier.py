@@ -8,6 +8,7 @@ from .. import models
 import json
 import datetime
 import uuid
+from . import email
 
 def cashier_page(request):
     if request.session.get('cajero'):
@@ -55,6 +56,9 @@ def finish_shop(request):
         client = create_or_update_clients(data.get('cliente'))
         cashier = models.Cajero.objects.get(idCajero=request.session.get('id'))
         factura_id = int(uuid.uuid4().int & (1 << 32)-1)
+        fisica = data.get('fisico')
+        digital = data.get('digital')
+        print(data)
         try:
             with transaction.atomic():
                 factura = models.Factura(
@@ -67,9 +71,21 @@ def finish_shop(request):
                 )
                 factura.save()
                 list_products = data.get('productos')
-                pdflink = generate_pdf(client, cashier, factura, list_products)
-                factura.link = pdflink
-                factura.save()
+                if fisica & digital:
+                    pdflink = generate_pdf(client, cashier, factura, list_products)
+                    factura.link = pdflink
+                    factura.save()
+                    email.send_email(client.correo, factura)
+                elif fisica:
+                    pdflink = generate_pdf(client, cashier, factura, list_products)
+                    factura.link = pdflink
+                    factura.save()
+                elif digital:
+                    pdflink = generate_pdf(client, cashier, factura, list_products)
+                    factura.link = pdflink
+                    factura.save()
+                    create_compra(list_products, factura)
+                    return JsonResponse(success=True)
                 create_compra(list_products, factura)
         except IntegrityError as e:
             return JsonResponse({'error': str(e)})

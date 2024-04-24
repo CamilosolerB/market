@@ -39,6 +39,8 @@ async function generateSale() {
         'subtotal': document.getElementById("subtotal").innerText,
         'total': document.getElementById("total").innerText,
         'iva': document.getElementById("iva").innerText,
+        'fisico': document.getElementById("inlineCheckbox1").checked,
+        'digital': document.getElementById("inlineCheckbox2").checked,
     }
     try {
         const response = await fetch('/cashier/create_sale/', {
