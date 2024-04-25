@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .. import models
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 
 def home_page(request):
     return render(request,'index.html')
@@ -13,6 +13,9 @@ def login_validation(request):
         password = post.get('password')
         try:
             admin = models.admin.objects.get(email=post.get('email'))
+            admin.password = make_password(password)
+            admin.save()
+            password = make_password(password)
             if check_password(password, admin.password):
                 request.session['id'] = admin.id
                 request.session['admin'] = True
