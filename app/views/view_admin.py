@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.hashers import make_password
 import openpyxl
 from django.core.files.storage import FileSystemStorage
+import uuid
 
 def home_page_admin(request):
     if request.session.get('admin'):
@@ -71,7 +72,8 @@ def create_admin(request):
             email = post.get('email')
             password = post.get('password')
             clave = make_password(password)
-            admin = models.admin.objects.create(email=email, password=clave)
+            admin = models.admin(email=email, password=clave)
+            admin.save()
             return redirect('/admin/admins')
         else:
             return redirect('/admin/')
@@ -88,7 +90,7 @@ def create_cashier(request):
             password = post.get('password')
             password = make_password(password)
             models.Cajero.objects.create(nombreCajero = nombre, salario = salario,
-                                          correo = correo, password = password)
+                                          correo = correo, password = password, totalEarning = 0)
             return redirect('/admin/cashiers')
         else:
             return redirect('/admin/')
