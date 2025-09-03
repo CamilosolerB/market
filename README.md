@@ -8,19 +8,19 @@ Para este proceso se requiere tener las siguientes aplicaciones.
 
 -   Python (preferiblemente entre las versiones 3.7 a 3.11)
 
-Lo primero es hacer un pull del proyecto desde la terminal
+Lo primero es hacer un clone del proyecto desde la terminal
 ~~~
-  git pull https://github.com/CamilosolerB/market.git
+  git clone https://github.com/CamilosolerB/market.git
 ~~~
-Si esta trabajando desde linux (cualquier distro) puede correr el
-siguiente comando desde la terminal.
+Tienes que tener instalado python y la libreria virtualenv, entras con vs code, abres una terminal en vscode y ejecutas
 ~~~
-  source ./local/bin/activate
+  ./myenv/Script/activate
 ~~~
-Posterior a eso corra el comando
+Si sale algun problema con politicas ejecuta desde powershell como administrador
 ~~~
-  pip install -r requirements.txt
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ~~~
+
 Esto hara que se instale todas las dependencias (antes de ejecutar esta
 accion se debe tener instalado python)
 
@@ -34,10 +34,6 @@ desde cualquier navegador web ingresamos a la siguiente url:
 ~~~
   localhost:8000/
 ~~~
-Tambien poseemos una version desplegada en el PaaS Render accediendo
-desde la web
-
-https://market-mwtx.onrender.com/
 
 los usuarios de acceso para el software inicialmente son:
 
