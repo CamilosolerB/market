@@ -1,0 +1,8 @@
+asgiref
+dj-database-url
+Django
+sqlparse
+tzdata
+requests
+whitenoise   # si sirves estáticos en producción
+psycopg2-binary  # si usas PostgreSQL
