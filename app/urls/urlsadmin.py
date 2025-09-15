@@ -21,5 +21,7 @@ urlpatterns = [
     path('qrpage/',view_admin.qr_admin),
     path('qrpage/nequi/',view_admin.create_nequi_qr),
     path('qrpage/daviplata/',view_admin.create_daviplata_qr),
-    path('generate_excel/',view_admin.generate_excel_product)
+    path('generate_excel/',view_admin.generate_excel_product),
+    path('generate_pdf/',view_admin.generate_pdf_product),
+
 ]

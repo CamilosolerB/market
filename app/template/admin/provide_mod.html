@@ -5,9 +5,10 @@
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">InvenSoft</div>
+        <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
     </a>        
 {% endblock %}
+
 {% block sidebar %}
     <li class="nav-item">
         <a class="nav-link" href="/admin/">
@@ -41,21 +42,55 @@
 <div class="row">
     <div class="col-4 card">
         <h1 class="container text-center"> Ingresar Proveedor</h1>
-        <form action="/admin/create_provider/" method="post" class="">
+        <form action="/admin/create_provider/" method="post" class="" novalidate>
             {% csrf_token %}
-            <label for="">Nit Empresa</label>
-            <input type="number" name="nit" id="" class="form-control">
-            <label for="">Nombre Empresa</label>
-            <input type="text" name="nombre" id="" class="form-control">
-            <button type="submit" class="btn btn-primary">Registrar</button>
+
+            <label for="nit">Nit Empresa</label>
+            <input type="number" name="nit" id="nit" class="form-control" 
+                   required min="100" step="1"
+                   oninput="if(this.value.length > 15) this.value = this.value.slice(0,15);">
+            <div class="invalid-feedback">Ingrese un NIT válido (mínimo 3 cifras).</div>
+
+            <label for="nombre">Nombre Empresa</label>
+            <input type="text" name="nombre" id="nombre" class="form-control" 
+                   required minlength="3" maxlength="100" 
+                   pattern="^[A-Za-zÀ-ÿ0-9\s]+$">
+            <div class="invalid-feedback">Ingrese un nombre válido (mínimo 3 caracteres, solo letras, números y espacios).</div>
+
+            <label for="telefono">Teléfono</label>
+            <input type="tel" name="telefono" id="telefono" class="form-control" 
+                   required pattern="^[0-9]{7,15}$">
+            <div class="invalid-feedback">Ingrese un teléfono válido (7 a 15 dígitos numéricos).</div>
+
+            <label for="direccion">Dirección</label>
+            <input type="text" name="direccion" id="direccion" class="form-control" 
+                   required minlength="5" maxlength="150">
+            <div class="invalid-feedback">Ingrese una dirección válida (mínimo 5 caracteres).</div>
+
+            <label for="ciudad">Ciudad</label>
+            <input type="text" name="ciudad" id="ciudad" class="form-control" 
+                   required minlength="2" maxlength="100" 
+                   pattern="^[A-Za-zÀ-ÿ\s]+$">
+            <div class="invalid-feedback">Ingrese una ciudad válida (solo letras y espacios).</div>
+
+            <label for="email">Correo electrónico</label>
+            <input type="email" name="email" id="email" class="form-control" required>
+            <div class="invalid-feedback">Ingrese un correo válido.</div>
+
+            <button type="submit" class="btn btn-primary mt-3">Registrar</button>
         </form>
     </div>
+
     <div class="col-8">
-        <table class="table">
+        <table class="table table-striped table-bordered table-responsive">
             <thead>
                 <tr>
                     <th scope="col">Nit</th>
                     <th scope="col">Nombre compañia</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Dirección</th>
+                    <th scope="col">Ciudad</th>
+                    <th scope="col">Email</th>
                     <th scope="col">Opciones</th>
                 </tr>
             </thead>
@@ -64,8 +99,14 @@
                 <tr>
                     <th>{{ data.nitProvider}}</th>
                     <td>{{ data.nomProvider }}</td>
+                    <td>{{ data.phoneProvider }}</td>
+                    <td>{{ data.dirProvider }}</td>
+                    <td>{{ data.cityProvider }}</td>
+                    <td>{{ data.emailProvider }}</td>
                     <td> 
-                        <button class="btn btn-danger" onclick="deleteNote({{ data.nitProvider}}, '{{ csrf_token }}', 'provider')"><i class="fa-solid fa-trash"></i></button>
+                        <button class="btn btn-danger" onclick="deleteNote({{ data.nitProvider}}, '{{ csrf_token }}', 'provider')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{ data.nitProvider}}">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
@@ -73,23 +114,56 @@
                 </tr>
                 <div class="modal fade" id="exampleModal{{ data.nitProvider}}" tabindex="-1" role="dialog"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <form action="/admin/update_provider/" method="post" class="">
+                    <form action="/admin/update_provider/" method="post" class="" novalidate>
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <h5 class="modal-title" id="exampleModalLabel">Editar Proveedor</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
                                     {% csrf_token %}
-                                    <label for="">Nit Empresa</label>
-                                    <input type="number" name="nit" id="" class="form-control" value="{{ data.nitProvider}}">
-                                    <label for="">Nombre Empresa</label>
-                                    <input type="text" name="nombre" id="" class="form-control" value="{{ data.nomProvider }}">                        
+                                    <label for="nit{{ data.nitProvider}}">Nit Empresa</label>
+                                    <input type="number" name="nit" id="nit{{ data.nitProvider}}" class="form-control" 
+                                           required min="100" step="1"
+                                           value="{{ data.nitProvider}}">
+                                    <div class="invalid-feedback">Ingrese un NIT válido.</div>
+
+                                    <label for="nombre{{ data.nitProvider}}">Nombre Empresa</label>
+                                    <input type="text" name="nombre" id="nombre{{ data.nitProvider}}" class="form-control" 
+                                           required minlength="3" maxlength="100" 
+                                           pattern="^[A-Za-zÀ-ÿ0-9\s]+$"
+                                           value="{{ data.nomProvider }}">  
+                                    <div class="invalid-feedback">Ingrese un nombre válido.</div>   
+
+                                    <label for="telefono{{ data.nitProvider}}">Teléfono</label>
+                                    <input type="tel" name="telefono" id="telefono{{ data.nitProvider}}" class="form-control"
+                                           required pattern="^[0-9]{7,15}$"
+                                           value="{{ data.phoneProvider }}">
+                                    <div class="invalid-feedback">Ingrese un teléfono válido.</div>
+
+                                    <label for="direccion{{ data.nitProvider}}">Dirección</label>
+                                    <input type="text" name="direccion" id="direccion{{ data.nitProvider}}" class="form-control"
+                                           required minlength="5" maxlength="150"
+                                           value="{{ data.dirProvider }}">
+                                    <div class="invalid-feedback">Ingrese una dirección válida.</div>
+
+                                    <label for="ciudad{{ data.nitProvider}}">Ciudad</label>
+                                    <input type="text" name="ciudad" id="ciudad{{ data.nitProvider}}" class="form-control"
+                                           required minlength="2" maxlength="100" pattern="^[A-Za-zÀ-ÿ\s]+$"
+                                           value="{{ data.cityProvider }}">
+                                    <div class="invalid-feedback">Ingrese una ciudad válida.</div>
+
+                                    <label for="email{{ data.nitProvider}}">Correo electrónico</label>
+                                    <input type="email" name="email" id="email{{ data.nitProvider}}" class="form-control"
+                                           required value="{{ data.emailProvider }}">
+                                    <div class="invalid-feedback">Ingrese un correo válido.</div>  
+
+                                </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                                 </div>
                             </div>
@@ -101,4 +175,31 @@
         </table>
     </div>
 </div>
+
+<script>
+    // Activar DataTable
+    const mytable = document.querySelector('table');
+    const dataTable = new DataTable(mytable, {
+        searchable: true,
+        fixedHeight: true,
+        perPage: 5
+    });
+
+    // Validaciones Bootstrap
+    (function () {
+      'use strict';
+      const forms = document.querySelectorAll('form');
+
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+</script>
+
 {% endblock %}

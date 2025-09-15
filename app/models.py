@@ -3,6 +3,10 @@ from django.db import models
 class Proveedor(models.Model):
     nitProvider = models.AutoField(primary_key=True)
     nomProvider = models.CharField(max_length=50)
+    phoneProvider = models.CharField(max_length=11, default="")
+    emailProvider = models.EmailField(max_length=50, default="")
+    dirProvider = models.CharField(max_length=100, default="")
+    cityProvider = models.CharField(max_length=50, default="")
 
 class Producto(models.Model):
     idProducto = models.AutoField(primary_key=True)

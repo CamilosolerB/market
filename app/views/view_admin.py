@@ -6,6 +6,15 @@ import openpyxl
 from django.core.files.storage import FileSystemStorage
 import uuid
 
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.units import inch
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+import io
+
+
 def home_page_admin(request):
     if request.session.get('admin'):
         providers = models.Proveedor.objects.all()
@@ -38,7 +47,7 @@ def cashier_admin(request):
     
 def qr_admin(request):
     if request.session.get('admin'):
-        stats = models.stats.objects.all()[0]
+        stats = models.stats.objects.all().first()
         return render(request, './admin/qr_page.html', {'stats':stats,'color': 'primary'})
     else:
         return redirect('/singout/')
@@ -103,7 +112,12 @@ def create_provider(request):
             post = request.POST
             nit = post.get('nit')
             nombre = post.get('nombre')
-            models.Proveedor.objects.create(nitProvider=nit, nomProvider = nombre)
+            phone = post.get('telefono')
+            direccion = post.get('direccion')
+            ciudad = post.get('ciudad')
+            email = post.get('email')
+            models.Proveedor.objects.create(nitProvider=nit, nomProvider = nombre, phoneProvider = phone, 
+                                            emailProvider = email, dirProvider = direccion, cityProvider = ciudad)
             return redirect('/admin/providers')
         else:
             return redirect('/admin/')
@@ -272,9 +286,66 @@ def generate_excel_product(request):
     else:
         return redirect('/singout/')
     
+
+def generate_pdf_product(request):
+    if request.session.get('admin'):
+        # Crear un buffer en memoria
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=landscape(letter))
+        
+        # Título
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(250, 550, "Reporte de Productos")
+
+        # Obtener productos
+        products = models.Producto.objects.all()
+
+        # Encabezados de tabla
+        data = [
+            ['ID', 'Nombre', 'Precio', 'IVA', 'Stock', 'NIT', 'Nombre Compañía']
+        ]
+
+        # Agregar filas
+        for product in products:
+            data.append([
+                product.idProducto,
+                product.nombreProducto,
+                str(product.precioCompra),
+                f"{product.ivaProducto:.2f} %",
+                f"{product.stockProducto} {product.unidadMedidad}",
+                product.nitProveedor.nitProvider,
+                product.nitProveedor.nomProvider
+            ])
+
+        # Crear tabla
+        table = Table(data, colWidths=[1*inch, 2*inch, 1*inch, 1*inch, 1.2*inch, 1.2*inch, 2*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.gray),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ]))
+
+        # Posicionar la tabla
+        table.wrapOn(p, 30, 400)
+        table.drawOn(p, 30, 200)
+
+        # Finalizar PDF
+        p.showPage()
+        p.save()
+
+        buffer.seek(0)
+        return HttpResponse(buffer, content_type='application/pdf', headers={
+            'Content-Disposition': 'attachment; filename="productos.pdf"',
+        })
+    else:
+        return redirect('/singout/')
+
 def create_nequi_qr(request):
     if request.session.get('admin'):
-        qr = models.stats.objects.all()[0]
+        qr = models.stats.objects.all().first()
         myFile = request.FILES['qrcode']
         fs = FileSystemStorage()
         dirfile = 'app/static/img/'+myFile.name

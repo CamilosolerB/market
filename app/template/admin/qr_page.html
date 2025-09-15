@@ -5,7 +5,7 @@
     <div class="sidebar-brand-icon rotate-n-15">
         <i class="fas fa-laugh-wink"></i>
     </div>
-    <div class="sidebar-brand-text mx-3">InvenSoft</div>
+    <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
 </a>
 {% endblock %}
 {% block sidebar %}
@@ -39,23 +39,55 @@
 
 {% block content %}
 {% load static %}
-<h1 class="text-center">QR Page</h1>
-    <div class="row">
-        <div class="col">
-            <form action="/admin/qrpage/nequi/" method="post" class="card" enctype="multipart/form-data">{% csrf_token %}
-                <h2 class="text-center">QR Nequi</h2>
-                <input type="file" name="qrcode" id="" class="form-control-lg">
-                <button class="btn btn-primary">Cargar QR nequi</button>
-            </form>
-            <img src="{% static stats.nequi %}" alt="nequi img" style="width:100%;height:60%">
+<h1 class="text-center mb-4">Métodos de Pagos Digitales</h1>
+<div class="row">
+    <!-- Nequi -->
+    <div class="col-md-6">
+        <form action="/admin/qrpage/nequi/" method="post" enctype="multipart/form-data" class="card p-3 text-center shadow">
+            {% csrf_token %}
+            <h2 class="text-center text-white p-2 rounded" style="background-color:#9b2fae;">
+                <i class="fa-solid fa-mobile-screen-button"></i> QR Nequi
+            </h2>
+            <label class="btn btn-outline-dark rounded-pill mt-3">
+                <i class="fa-solid fa-upload"></i> Subir QR Nequi
+                <input type="file" name="qrcode" hidden>
+            </label>
+            <button type="submit" class="btn btn-primary mt-3 rounded-pill w-100">
+                <i class="fa-solid fa-check-circle"></i> Confirmar
+            </button>
+        </form>
+        <div class="mt-3 text-center">
+            <h5>Previsualización</h5>
+            <img src="{% static stats.nequi %}" alt="QR Nequi" class="img-fluid border rounded shadow-sm p-2">
         </div>
-        <div class="col">
-            <form action="/admin/qrpage/daviplata/" method="post" class="card" enctype="multipart/form-data">{% csrf_token %}
-                <h2 class="text-center">QR Daviplata</h2>
-                <input type="file" name="qrcode" id="" class="form-control">
-                <button class="btn btn-danger">Cargar QR Daviplata</button>
-            </form>
-            <img src="{% static stats.daviplata %}" alt="daviplata img" style="width:100%;height:60%">
-        </div>   
     </div>
+
+    <!-- Daviplata -->
+    <div class="col-md-6">
+        <form action="/admin/qrpage/daviplata/" method="post" enctype="multipart/form-data" class="card p-3 text-center shadow">
+            {% csrf_token %}
+            <h2 class="text-center text-white p-2 rounded" style="background-color:#e60000;">
+                <i class="fa-solid fa-building-columns"></i> QR Daviplata
+            </h2>
+            <label class="btn btn-outline-dark rounded-pill mt-3">
+                <i class="fa-solid fa-upload"></i> Subir QR Daviplata
+                <input type="file" name="qrcode" hidden>
+            </label>
+            <button type="submit" class="btn btn-danger mt-3 rounded-pill w-100">
+                <i class="fa-solid fa-check-circle"></i> Confirmar
+            </button>
+        </form>
+        <div class="mt-3 text-center">
+            <h5>Previsualización</h5>
+            <img src="{% static stats.daviplata %}" alt="QR Daviplata" class="img-fluid border rounded shadow-sm p-2">
+        </div>
+    </div>
+</div>
+
+<!-- Mensaje de éxito -->
+{% if message %}
+<div class="alert alert-success text-center mt-4">
+    <i class="fa-solid fa-circle-check"></i> {{ message }}
+</div>
+{% endif %}
 {% endblock %}

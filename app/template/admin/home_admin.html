@@ -1,11 +1,14 @@
 {% extends 'dashboard.html'%}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 {% block title %}
 <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
     <div class="sidebar-brand-icon rotate-n-15">
         <i class="fas fa-laugh-wink"></i>
     </div>
-    <div class="sidebar-brand-text mx-3">InvenSoft</div>
+    <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
 </a>
 {% endblock %}
 {% block sidebar %}
@@ -41,17 +44,24 @@
 <div class="row">
     <div class="col-4 card">
         <h1 class="container text-center"> Ingresar producto</h1>
-        <form action="create_product/" method="post" class="">
+        <form action="create_product/" method="post" class="" novalidate>
             {% csrf_token %}
             <label for="nombre">Nombre</label>
-            <input type="text" name="nombre" id="" class="form-control">
-            <label for="">Precio Compra</label>
-            <input type="number" name="precio" id="" class="form-control">
-            <label for="">Cantidad</label>
+            <input type="text" name="nombre" id="nombre" class="form-control" required minlength="3" maxlength="100"
+                pattern="^[A-Za-zÀ-ÿ0-9\s]+$">
+            <div class="invalid-feedback">Ingrese un nombre válido (mínimo 3 caracteres, solo letras, números y
+                espacios).</div>
+
+            <label for="precio">Precio Compra</label>
+            <input type="number" name="precio" id="precio" class="form-control" required min="1" step="0.01">
+            <div class="invalid-feedback">Ingrese un precio válido (mayor a 0).</div>
+
+            <label for="cantidad">Cantidad</label>
             <div class="input-group mb-3">
-                <input type="number" class="form-control" name="cantidad" placeholder="Ingrese su texto aquí"
-                    aria-label="Ingrese su texto aquí" aria-describedby="basic-addon2">
-                <select class="form-select" id="inputGroupSelect02" name="unidad">
+                <input type="number" class="form-control" name="cantidad" id="cantidad" required min="1" step="1"
+                    placeholder="Ingrese cantidad" aria-label="Cantidad" aria-describedby="basic-addon2">
+                <select class="form-select" id="inputGroupSelect02" name="unidad" required>
+                    <option selected disabled value="">Seleccione...</option>
                     <optgroup label="Peso">
                         <option value="kg">Kilogramos</option>
                         <option value="g">Gramos</option>
@@ -59,7 +69,7 @@
                     </optgroup>
                     <optgroup label="Volumen">
                         <option value="lit">Litros</option>
-                        <option value="cm3">Centimetros cubicos</option>
+                        <option value="cm3">Centímetros cúbicos</option>
                         <option value="gal">Galones</option>
                     </optgroup>
                     <optgroup label="Otras">
@@ -67,43 +77,57 @@
                         <option value="ca">Cajas</option>
                         <option value="doc">Docenas</option>
                     </optgroup>
-                    <optgroup label="longitud">
+                    <optgroup label="Longitud">
                         <option value="mt">Metro</option>
                         <option value="ft">Pies</option>
-                        <option value="cm">Centimetros</option>
+                        <option value="cm">Centímetros</option>
                         <option value="Pul">Pulgadas</option>
                     </optgroup>
                 </select>
+                <div class="invalid-feedback">Seleccione una unidad.</div>
             </div>
-            <label for="">Porcentaje de iva</label>
-            <input type="number" name="iva" id="" class="form-control">
-            <label for="">Proveedor</label>
+
+            <label for="iva">Porcentaje de IVA</label>
+            <input type="number" name="iva" id="iva" class="form-control" required min="0" max="100" step="0.01">
+            <div class="invalid-feedback">Ingrese un IVA válido (0 - 100%).</div>
+
+            <label for="provider">Proveedor</label>
             <div class="input-group mb-3">
-                <label class="input-group-text" for="inputGroupSelect01">Options</label>
-                <select class="form-select" id="inputGroupSelect01" name="provider">
-                    <option disabled>Escoja una opcion</option>
+                <label class="input-group-text" for="inputGroupSelect01">Opciones</label>
+                <select  id="provider" name="provider" required>
+                    <option selected disabled value="">Escoja una opción</option>
                     {% for providers in providers %}
                     <option value="{{providers.nitProvider}}">{{providers.nitProvider}} - {{providers.nomProvider}}
                     </option>
-                    {%endfor%}
+                    {% endfor %}
                 </select>
+                <div class="invalid-feedback">Seleccione un proveedor.</div>
             </div>
+
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
     </div>
+
     <div class="col-8">
-        <a href="/admin/generate_excel/" class="btn btn-success"><i class="fa-solid fa-file"></i>Generar inventario
-            Excel</a>
+        <!-- Botones de exportación -->
+        <a href="/admin/generate_excel/" class="btn btn-success mb-2">
+            <i class="fa-solid fa-file-excel"></i> Generar inventario Excel
+        </a>
+        <a href="/admin/generate_pdf/" class="btn btn-danger mb-2">
+            <i class="fa-solid fa-file-pdf"></i> Generar inventario PDF
+        </a>
+
+        <!-- Tabla de productos -->
         <table class="table">
             <thead>
                 <tr>
                     <th scope="col">Id</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Precio de compra</th>
-                    <th scope="col">Iva</th>
-                    <th scope="col">Stock </th>
+                    <th scope="col">IVA</th>
+                    <th scope="col">Stock</th>
                     <th scope="col">NIT Proveedor</th>
-                    <th scope="col"> Opciones</th>
+                    <th scope="col">Opciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,93 +141,126 @@
                     <td>{{ data.nitProveedor.nitProvider}}</td>
                     <td>
                         <button class="btn btn-danger"
-                            onclick="deleteNote({{ data.idProducto}},'{{ csrf_token }}','product' )"><i
-                                class="fa-solid fa-trash"></i></button>
+                            onclick="deleteNote({{ data.idProducto}},'{{ csrf_token }}','product' )">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal"
                             data-target="#exampleModal{{ data.idProducto }}">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
                     </td>
                 </tr>
+
+                <!-- Modal de edición -->
                 <div class="modal fade" id="exampleModal{{ data.idProducto }}" tabindex="-1" role="dialog"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <form action="update_product/" method="post" class="">
+                    <form action="update_product/" method="post" class="" novalidate>
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <h5 class="modal-title">Editar Producto</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-
                                     {% csrf_token %}
                                     <input type="hidden" name="id" value="{{ data.idProducto}}">
-                                    <label for="nombre">Nombre</label>
-                                    <input type="text" name="nombre" id="" class="form-control"
-                                        value="{{ data.nombreProducto}}">
-                                    <label for="">Precio Compra</label>
-                                    <input type="number" name="precio" id="" class="form-control"
-                                        value="{{ data.precioCompra}}">
-                                    <label for="">Cantidad</label>
+
+                                    <label for="nombre{{ data.idProducto }}">Nombre</label>
+                                    <input type="text" name="nombre" class="form-control"
+                                        value="{{ data.nombreProducto}}" required minlength="3" maxlength="100">
+
+                                    <label for="precio{{ data.idProducto }}">Precio Compra</label>
+                                    <input type="number" name="precio" class="form-control"
+                                        value="{{ data.precioCompra}}" required min="1" step="0.01">
+
+                                    <label for="cantidad{{ data.idProducto }}">Cantidad</label>
                                     <div class="input-group mb-3">
                                         <input type="number" class="form-control" value="{{ data.stockProducto}}"
-                                            name="cantidad" placeholder="Ingrese su texto aquí"
-                                            aria-label="Ingrese su texto aquí" aria-describedby="basic-addon2">
-                                        <select class="form-select" id="inputGroupSelect02" name="unidad">
-                                            <optgroup label="Peso">
-                                                <option value="kg">Kilogramos</option>
-                                                <option value="g">Gramos</option>
-                                                <option value="lib">Libras</option>
-                                            </optgroup>
-                                            <optgroup label="Volumen">
-                                                <option value="lit">Litros</option>
-                                                <option value="cm3">Centimetros cubicos</option>
-                                                <option value="gal">Galones</option>
-                                            </optgroup>
-                                            <optgroup label="Otras">
-                                                <option value="uni">Unidades</option>
-                                                <option value="ca">Cajas</option>
-                                                <option value="doc">Docenas</option>
-                                            </optgroup>
-                                            <optgroup label="longitud">
-                                                <option value="mt">Metro</option>
-                                                <option value="ft">Pies</option>
-                                                <option value="cm">Centimetros</option>
-                                                <option value="Pul">Pulgadas</option>
-                                            </optgroup>
-                                        </select>
+                                            name="cantidad" required min="1" step="1">
+                                        <select class="form-select" name="unidad" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="kg">Kilogramos</option>
+                                            <option value="g">Gramos</option>
+                                            <option value="lib">Libras</option>
+                                            <option value="lit">Litros</option>
+                                            <option value="cm3">Centímetros cúbicos</option>
+                                            <option value="gal">Galones</option>
+                                            <option value="uni">Unidades</option>
+                                            <option value="ca">Cajas</option>
+                                            <option value="doc">Docenas</option>
+                                            <option value="mt">Metro</option>
+                                            <option value="ft">Pies</option>
+                                            <option value="cm">Centímetros</option>
+                                            <option value="Pul">Pulgadas</option>
                                         </select>
                                     </div>
-                                    <label for="">Porcentaje de iva</label>
-                                    <input type="number" name="iva" id="" class="form-control"
-                                        value="{{ data.ivaProducto|floatformat:" 2" }}">
-                                    <label for="">Proveedor</label>
+
+                                    <label for="iva{{ data.idProducto }}">Porcentaje de IVA</label>
+                                    <input type="number" name="iva" class="form-control"
+                                        value="{{ data.ivaProducto|floatformat:'2' }}" required min="0" max="100">
+
+                                    <label for="provider{{ data.idProducto }}">Proveedor</label>
                                     <div class="input-group mb-3">
-                                        <label class="input-group-text" for="inputGroupSelect01">Options</label>
-                                        <select class="form-select" id="inputGroupSelect01" name="provider">
-                                            <option disabled>Escoja una opcion</option>
+                                        <label class="input-group-text">Opciones</label>
+                                        <select name="provider" id="provider" required>
+                                            <option value="">Escoja una opción</option>
                                             {% for providers in providers %}
                                             <option value="{{providers.nitProvider}}">{{providers.nitProvider}} -
                                                 {{providers.nomProvider}}</option>
-                                            {%endfor%}
+                                            {% endfor %}
                                         </select>
                                     </div>
-
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
-                {% endfor%}
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    // Validaciones Bootstrap
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('form');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+    $(document).ready(function () {
+        // DataTables
+        $('table').DataTable({
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+            }
+        });
+        if ($.fn.select2) {
+            console.log("✅ Select2 cargado correctamente");
+            $('#provider').select2({
+                placeholder: "Buscar proveedor...",
+                allowClear: true,
+                width: '100%'
+            });
+        } else {
+            console.log("❌ Select2 no está disponible");
+        }
+    });
+
+</script>
 
 {% endblock %}
