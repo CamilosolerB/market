@@ -1,0 +1,146 @@
+<!-- storage.html -->
+{% extends 'dashboard.html'%}
+
+{% block title %}
+<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
+    <div class="sidebar-brand-icon rotate-n-15">
+        <i class="fas fa-laugh-wink"></i>
+    </div>
+    <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
+</a>
+{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="/admin/">
+        <i class="fa-solid fa-cart-shopping"></i> Producto
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/admins/">
+        <i class="fa-solid fa-user-tie"></i> Administradores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/storage/">
+        <i class="fa-solid fa-warehouse"></i> Almacén
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/providers/">
+        <i class="fa-solid fa-truck"></i> Proveedores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/bodega/">
+        <i class="fa-solid fa-boxes-stacked"></i> Bodega
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/qrpage/">
+        <i class="fa-solid fa-qrcode"></i> QR
+    </a>
+</li>
+
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Formulario de Almacén -->
+    <div class="col-4 card p-4">
+        <h1 class="text-center mb-4">Agregar Item</h1>
+        <form action="/admin/create_storage_item/" method="post" id="storageForm">
+            {% csrf_token %}
+            <label for="item">Item</label>
+            <input type="text" name="item" id="item" class="form-control" required minlength="3" maxlength="100">
+
+            <label for="cantidad">Cantidad</label>
+            <input type="number" name="cantidad" id="cantidad" class="form-control" required min="0">
+
+            <button type="submit" class="btn btn-primary mt-3 w-100">Registrar</button>
+        </form>
+    </div>
+
+    <!-- Tabla de Almacén -->
+    <div class="col-8">
+        <table class="table table-hover text-center align-middle" id="storageTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>CODIGO</th>
+                    <th>ITEM</th>
+                    <th>CANTIDAD</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in data %}
+                <tr>
+                    <td>{{ data.idItem }}</td>
+                    <td>{{ data.item_name }}</td>
+                    <td>{{ data.quantity }}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteNote({{ data.idItem }}, '{{ csrf_token }}', 'storage')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ data.idItem }}">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Modal editar -->
+                <div class="modal fade" id="editModal{{ data.idItem }}" tabindex="-1" role="dialog">
+                    <form action="/admin/update_storage_item/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ data.idItem }}">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">Editar Item</h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <label>Item</label>
+                                    <input type="text" name="item" class="form-control" value="{{ data.item_name }}" required>
+                                    <label>Cantidad</label>
+                                    <input type="number" name="cantidad" class="form-control" value="{{ data.quantity }}" required min="0">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-warning">Guardar cambios</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    $('#storageTable').DataTable({
+        responsive: true,
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+        }
+    });
+
+    document.getElementById("storageForm").addEventListener("submit", function(e) {
+        const item = document.getElementById("item").value.trim();
+        const cantidad = document.getElementById("cantidad").value;
+        if(item.length < 3){
+            alert("El item debe tener mínimo 3 caracteres.");
+            e.preventDefault();
+        }
+        if(cantidad < 0){
+            alert("La cantidad no puede ser negativa.");
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

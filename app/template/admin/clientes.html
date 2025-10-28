@@ -1,0 +1,200 @@
+{% extends 'dashboard.html' %}
+
+{% block extra_head %}
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block sidebar %}
+<ul class="navbar-nav">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/">
+            <i class="fa-solid fa-cart-shopping"></i> Producto
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/admins/">
+            <i class="fa-solid fa-user-tie"></i> Administradores
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/storage/">
+            <i class="fa-solid fa-warehouse"></i> Almacén
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/providers/">
+            <i class="fa-solid fa-truck"></i> Proveedores
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/bodega/">
+            <i class="fa-solid fa-boxes-stacked"></i> Bodega
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/clientes/">
+            <i class="fa-solid fa-users"></i> Clientes
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/qrpage/">
+            <i class="fa-solid fa-qrcode"></i> QR
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Clientes</h3>
+
+    <!-- Botón Agregar Cliente -->
+    <button type="button" class="btn btn-primary mb-3" onclick="openAddClienteModal()">
+        Agregar Cliente
+    </button>
+
+    <!-- Tabla de clientes -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Cliente</th>
+                <th>Razón Social</th>
+                <th>Teléfono</th>
+                <th>Contacto</th>
+                <th>Correo</th>
+                <th>Ciudad</th>
+                <th>Tipo de Agua</th>
+                <th>Cantidad Promedio KG</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.codigo }}</td>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.razon_social }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.contacto }}</td>
+                <td>{{ cliente.correo }}</td>
+                <td>{{ cliente.ciudad }}</td>
+                <td>{{ cliente.tipo_agua }}</td>
+                <td>{{ cliente.cantidad_promedio_kg }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning" 
+                        onclick="openEditClienteModal('{{ cliente.codigo }}', '{{ cliente.nombre }}', '{{ cliente.razon_social }}', '{{ cliente.telefono }}', '{{ cliente.contacto }}', '{{ cliente.correo }}', '{{ cliente.ciudad }}', '{{ cliente.tipo_agua }}', '{{ cliente.cantidad_promedio_kg }}')">
+                        Editar
+                    </button>
+                    <a href="{% url 'delete_cliente' cliente.codigo %}" class="btn btn-sm btn-danger"
+                        onclick="return confirm('¿Está seguro que desea eliminar este cliente?');">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">No hay clientes registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Agregar/Editar Cliente -->
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" id="clienteForm">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="clienteModalLabel">Agregar Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Código</label>
+                    <input type="text" name="codigo" id="codigo" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Cliente</label>
+                    <input type="text" name="nombre_cliente" id="nombre_cliente" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Razón Social</label>
+                    <input type="text" name="razon_social" id="razon_social" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" id="telefono" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Contacto</label>
+                    <input type="text" name="contacto" id="contacto" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Correo</label>
+                    <input type="email" name="correo" id="correo" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Ciudad</label>
+                    <input type="text" name="ciudad" id="ciudad" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Tipo de Agua</label>
+                    <input type="text" name="tipo_agua" id="tipo_agua" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Cantidad Promedio KG</label>
+                    <input type="number" name="cantidad_promedio_kg" id="cantidad_promedio_kg" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+function openAddClienteModal() {
+    $('#clienteForm')[0].reset();
+    $('#clienteModalLabel').text('Agregar Cliente');
+    $('#clienteForm').attr('action', "{% url 'create_cliente' %}");
+    var modal = new bootstrap.Modal(document.getElementById('clienteModal'));
+    modal.show();
+}
+
+function openEditClienteModal(codigo, nombre, razon, telefono, contacto, correo, ciudad, tipo, cantidad) {
+    $('#clienteModalLabel').text('Editar Cliente');
+    $('#codigo').val(codigo);
+    $('#nombre_cliente').val(nombre);
+    $('#razon_social').val(razon);
+    $('#telefono').val(telefono);
+    $('#contacto').val(contacto);
+    $('#correo').val(correo);
+    $('#ciudad').val(ciudad);
+    $('#tipo_agua').val(tipo);
+    $('#cantidad_promedio_kg').val(cantidad);
+    $('#clienteForm').attr('action', "/admin/clientes/update/" + codigo + "/");
+    var modal = new bootstrap.Modal(document.getElementById('clienteModal'));
+    modal.show();
+}
+</script>
+{% endblock %}
