@@ -1,5 +1,6 @@
 {% extends 'dashboard.html'%}
 
+
 {% block title %}
 <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
     <div class="sidebar-brand-icon rotate-n-15">
@@ -11,8 +12,7 @@
 {% block sidebar %}
 <li class="nav-item">
     <a class="nav-link" href="/admin/">
-        <i class="fa-solid fa-cart-shopping"></i>
-        Producto
+        <i class="fa-solid fa-cart-shopping"></i> Producto
     </a>
 </li>
 <li class="nav-item">
@@ -21,8 +21,8 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link collapsed" href="/admin/cashiers/">
-        <i class="fa-solid fa-cash-register"></i> Cajeros
+    <a class="nav-link collapsed" href="/admin/storage/">
+        <i class="fa-solid fa-warehouse"></i> Almacén
     </a>
 </li>
 <li class="nav-item">
@@ -30,11 +30,22 @@
         <i class="fa-solid fa-truck"></i> Proveedores
     </a>
 </li>
-<li class="nav-item active">
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/bodega/">
+        <i class="fa-solid fa-boxes-stacked"></i> Bodega
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/clientes/">
+        <i class="fa-solid fa-users"></i> Clientes
+    </a>
+</li>
+<li class="nav-item">
     <a class="nav-link collapsed" href="/admin/qrpage/">
         <i class="fa-solid fa-qrcode"></i> QR
     </a>
 </li>
+
 {% endblock %}
 
 {% block content %}

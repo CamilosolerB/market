@@ -1,54 +1,98 @@
+
 from django.db import models
 
 class Proveedor(models.Model):
-    nitProvider = models.AutoField(primary_key=True)
-    nomProvider = models.CharField(max_length=50)
-    phoneProvider = models.CharField(max_length=11, default="")
-    emailProvider = models.EmailField(max_length=50, default="")
-    dirProvider = models.CharField(max_length=100, default="")
-    cityProvider = models.CharField(max_length=50, default="")
+    nit = models.CharField(max_length=10, primary_key=True)
+    nombre = models.CharField(max_length=100)
+    contacto = models.CharField(max_length=100, blank=True, null=True)
+    direccion = models.CharField(max_length=200, blank=True, null=True)
+    telefono = models.CharField(max_length=15, blank=True, null=True)
+    celular = models.CharField(max_length=15, blank=True, null=True)
+    web = models.CharField(max_length=100, blank=True, null=True)
+    correo = models.EmailField(max_length=100, blank=True, null=True)
+    codigoMat = models.CharField(max_length=20, blank=True, null=True)
+    nombreProducto = models.CharField(max_length=200, blank=True, null=True)
+    precio = models.FloatField(blank=True, null=True)
+    unidadMedida = models.CharField(max_length=50, blank=True, null=True)
+    unidadCompra = models.CharField(max_length=50, blank=True, null=True)
+    unidadMinCompra = models.IntegerField(blank=True, null=True)
+    leadTimeDias = models.IntegerField(blank=True, null=True)
+    medioTransporte = models.CharField(max_length=50, blank=True, null=True)
+    reabastecimiento = models.IntegerField(blank=True, null=True)
+    terminoPago = models.CharField(max_length=50, blank=True, null=True)
+    tiempoCreditoDias = models.IntegerField(blank=True, null=True)
 
 class Producto(models.Model):
     idProducto = models.AutoField(primary_key=True)
     nombreProducto = models.CharField(max_length=200)
-    precioCompra = models.FloatField(null=True)
-    unidadMedidad = models.CharField(max_length=50)
-    ivaProducto = models.FloatField(null=True)
-    stockProducto = models.IntegerField(null=True)
-    nitProveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    nombreGenerico = models.CharField(max_length=200, blank=True, null=True)
+    stockProducto = models.IntegerField(default=0)
+    unidadMedida = models.CharField(max_length=50)  
+    ubicacion = models.CharField(max_length=100, blank=True, null=True)
+    cantAdquirida = models.IntegerField(default=0)
+    proveedorPrincipal = models.ForeignKey(
+        Proveedor, on_delete=models.SET_NULL, related_name='principal', null=True, blank=True
+    )
+    proveedorSuplente = models.ForeignKey(
+        Proveedor, on_delete=models.SET_NULL, related_name='suplente', null=True, blank=True
+    )
+    proveedor3 = models.ForeignKey(
+        Proveedor, on_delete=models.SET_NULL, related_name='proveedor3', null=True, blank=True
+    )
+    proveedor4 = models.ForeignKey(
+        Proveedor, on_delete=models.SET_NULL, related_name='proveedor4', null=True, blank=True
+    )
+
+    def __str__(self):
+        return self.nombreProducto
+
+
+class StorageItem(models.Model):
+    idItem = models.AutoField(primary_key=True)
+    item_name = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField(default=0)
+    def __str__(self):
+        return f"{self.item_name} ({self.quantity})"
+    
+
+class Bodega(models.Model):
+    ubicacion = models.CharField(max_length=50)
+    nivel = models.IntegerField()
+    posicion = models.IntegerField()
+    localizador = models.CharField(max_length=20)
+    codigo = models.CharField(max_length=50, unique=True)
+    descripcion = models.CharField(max_length=200)
+    cantidad = models.IntegerField()
+    unidad = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
 
 class Cliente(models.Model):
-    cedula = models.IntegerField(primary_key=True)
-    nombreCliente = models.CharField(max_length=100)
-    numeroCompras = models.IntegerField()
-    correo = models.CharField(max_length=100)
-    telefono = models.FloatField(max_length=11)
+    codigo = models.CharField(max_length=20, primary_key=True, default='00001')
+    nombre = models.CharField(max_length=200, default='Nombre Cliente')
+    razon_social = models.CharField(max_length=200, default='Razón Social Cliente')
+    telefono = models.CharField(max_length=15, blank=True, null=True)
+    contacto = models.CharField(max_length=200, blank=True, null=True)
+    correo = models.EmailField(max_length=100, blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+    tipo_agua = models.CharField(max_length=100, blank=True, null=True)
+    cantidad_promedio_kg = models.IntegerField(blank=True, null=True)
 
-class Cajero(models.Model):
+    def __str__(self):
+        return f"{self.codigo} - {self.nombre}"
+
+class Usuario(models.Model):
     idCajero = models.AutoField(primary_key=True)
     nombreCajero = models.CharField(max_length=100)
-    salario = models.FloatField(max_length=11)
-    correo = models.EmailField(max_length=100, default=None)
-    password = models.CharField(max_length=255, default=None)
-    totalEarning = models.FloatField(max_length=11)
+    correo = models.EmailField(max_length=50, unique=True)
+    password = models.CharField(max_length=255)
+    salario = models.FloatField(default=0)
+    totalEarning = models.FloatField(default=0)
 
-class Factura(models.Model):
-    idFactura = models.IntegerField(primary_key=True)
-    cedulaCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    idCajero = models.ForeignKey(Cajero, on_delete=models.CASCADE)
-    totalBruto = models.FloatField(null=False)
-    totalIva = models.FloatField(null=False)
-    subTotal = models.FloatField(null=False)
-    link = models.CharField(max_length=255)
-    day = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.nombreCajero} - {self.correo}"
 
-class Compra(models.Model):
-    idCompra = models.AutoField(primary_key=True)
-    idProducto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(null=False)
-    total = models.FloatField(null=False)
-    utilidad = models.FloatField(null=False)
-    idFactura = models.ForeignKey(Factura, on_delete=models.CASCADE)
 
 class admin(models.Model):
     id = models.AutoField(primary_key=True)
@@ -63,4 +107,4 @@ class stats(models.Model):
     sellsFourWeek = models.FloatField(max_length=11)
     nequi = models.CharField(max_length=255)
     daviplata = models.CharField(max_length=255)
-    bestCashierMonth = models.ForeignKey(Cajero, on_delete=models.CASCADE)
+    

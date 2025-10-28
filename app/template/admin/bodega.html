@@ -1,0 +1,260 @@
+{% extends 'dashboard.html' %}
+
+{% block title %}
+<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
+    <div class="sidebar-brand-icon rotate-n-15">
+        <i class="fas fa-laugh-wink"></i>
+    </div>
+    <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
+</a>
+{% endblock %}
+
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="/admin/">
+        <i class="fa-solid fa-cart-shopping"></i> Producto
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/admins/">
+        <i class="fa-solid fa-user-tie"></i> Administradores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/storage/">
+        <i class="fa-solid fa-warehouse"></i> Almacén
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/providers/">
+        <i class="fa-solid fa-truck"></i> Proveedores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/bodega/">
+        <i class="fa-solid fa-boxes-stacked"></i> Bodega
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/clientes/">
+        <i class="fa-solid fa-users"></i> Clientes
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/qrpage/">
+        <i class="fa-solid fa-qrcode"></i> QR
+    </a>
+</li>
+
+
+{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Gestión de Bodega</h2>
+    <form method="POST" action="{% url 'create_bodega' %}">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col">
+                <label for="ubicacion">Ubicación</label>
+                <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+            </div>
+            <div class="col">
+                <label for="nivel">Nivel</label>
+                <input type="number" class="form-control" id="nivel" name="nivel" required>
+            </div>
+            <div class="col">
+                <label for="posicion">Posición</label>
+                <input type="number" class="form-control" id="posicion" name="posicion" required>
+            </div>
+            <div class="col">
+                <label for="localizador">Localizador</label>
+                <input type="text" class="form-control" id="localizador" name="localizador" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="codigo">Código</label>
+                <input type="text" class="form-control" id="codigo" name="codigo" required>
+            </div>
+            <div class="col">
+                <label for="descripcion">Descripción</label>
+                <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+            </div>
+            <div class="col">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" class="form-control" id="cantidad" name="cantidad" required>
+            </div>
+            <div class="col">
+                <label for="unidad">Unidad de Medida</label>
+                <select class="form-select" id="unidad" name="unidad" required>
+                    <option selected disabled value="">Seleccione...</option>
+                    <optgroup label="Peso">
+                        <option value="kg">Kilogramos</option>
+                        <option value="g">Gramos</option>
+                        <option value="lib">Libras</option>
+                    </optgroup>
+                    <optgroup label="Volumen">
+                        <option value="lit">Litros</option>
+                        <option value="cm3">Centímetros cúbicos</option>
+                        <option value="gal">Galones</option>
+                    </optgroup>
+                    <optgroup label="Otras">
+                        <option value="uni">Unidades</option>
+                        <option value="ca">Cajas</option>
+                        <option value="doc">Docenas</option>
+                    </optgroup>
+                    <optgroup label="Longitud">
+                        <option value="mt">Metro</option>
+                        <option value="ft">Pies</option>
+                        <option value="cm">Centímetros</option>
+                        <option value="Pul">Pulgadas</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar Item</button>
+    </form>
+
+    <!-- TABLA DE ITEMS -->
+    <h3>Items en Bodega</h3>
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Ubicación</th>
+                <th>Nivel</th>
+                <th>Posición</th>
+                <th>Localizador</th>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in bodega_items %}
+            <tr>
+                <td>{{ item.ubicacion }}</td>
+                <td>{{ item.nivel }}</td>
+                <td>{{ item.posicion }}</td>
+                <td>{{ item.localizador }}</td>
+                <td>{{ item.codigo }}</td>
+                <td>{{ item.descripcion }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.unidad }}</td>
+                <td>
+                <button class="btn btn-sm btn-warning" onclick="openEditModal(
+                    '{{ item.id }}',
+                    '{{ item.ubicacion }}',
+                    '{{ item.nivel }}',
+                    '{{ item.posicion }}',
+                    '{{ item.localizador }}',
+                    '{{ item.codigo }}', '{{ item.descripcion }}',
+                    '{{ item.cantidad }}',
+                    '{{ item.unidad }}')">Editar</button>
+                    <a href="{% url 'delete_bodega' item.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro que desea eliminar este item?');">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">No hay items en bodega.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL DE EDICIÓN -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        <form method="POST" id="editForm">
+            {% csrf_token %}
+            <div class="modal-header">
+            <h5 class="modal-title">Editar Item de Bodega</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_id" name="id">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Ubicación</label>
+                        <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
+                    </div>
+                    <div class="col">
+                        <label>Nivel</label>
+                        <input type="number" class="form-control" id="edit_nivel" name="nivel" required>
+                    </div>
+                    <div class="col">
+                        <label>Posición</label>
+                        <input type="number" class="form-control" id="edit_posicion" name="posicion" required>
+                    </div>
+                    <div class="col">
+                        <label>Localizador</label>
+                        <input type="text" class="form-control" id="edit_localizador" name="localizador" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Código</label>
+                        <input type="text" class="form-control" id="edit_codigo" name="codigo" required>
+                    </div>
+                    <div class="col">
+                        <label>Descripción</label>
+                        <input type="text" class="form-control" id="edit_descripcion" name="descripcion" required>
+                    </div>
+                    <div class="col">
+                        <label>Cantidad</label>
+                        <input type="number" class="form-control" id="edit_cantidad" name="cantidad" required>
+                    </div>
+                    <div class="col">
+                        <label>Unidad</label>
+                        <select class="form-select" id="edit_unidad" name="unidad" required>
+                            <option value="kg">Kilogramos</option>
+                            <option value="g">Gramos</option>
+                            <option value="lib">Libras</option>
+                            <option value="lit">Litros</option>
+                            <option value="cm3">Centímetros cúbicos</option>
+                            <option value="gal">Galones</option>
+                            <option value="uni">Unidades</option>
+                            <option value="ca">Cajas</option>
+                            <option value="doc">Docenas</option>
+                            <option value="mt">Metro</option>
+                            <option value="ft">Pies</option>
+                            <option value="cm">Centímetros</option>
+                            <option value="Pul">Pulgadas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+
+    <script>
+    function openEditModal(id, ubicacion, nivel, posicion, localizador, codigo, descripcion, cantidad, unidad) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_ubicacion').value = ubicacion;
+        document.getElementById('edit_nivel').value = nivel;
+        document.getElementById('edit_posicion').value = posicion;
+        document.getElementById('edit_localizador').value = localizador;
+        document.getElementById('edit_codigo').value = codigo;
+        document.getElementById('edit_descripcion').value = descripcion;
+        document.getElementById('edit_cantidad').value = cantidad;
+        document.getElementById('edit_unidad').value = unidad;
+
+        var editForm = document.getElementById('editForm');
+        editForm.action = '/admin/update_bodega/' + id + '/';
+        var myModal = new bootstrap.Modal(document.getElementById('editModal'));
+        myModal.show();
+    }
+    </script>
+    {% endblock %}
