@@ -13,6 +13,7 @@ def login_validation(request):
         password = post.get('password')
         try:
             admin = models.admin.objects.get(email=post.get('email'))
+            print(admin.password)
             if check_password(password, admin.password):
                 request.session['id'] = admin.id
                 request.session['admin'] = True
@@ -20,6 +21,7 @@ def login_validation(request):
                 return redirect('/admin/')
             else:
                 messages.error(request, 'Contraseña incorrecta')
+                raise ValueError('Contraseña incorrecta')
         except models.admin.DoesNotExist:
             try:
                 cashier = models.Cajero.objects.get(correo=post.get('email'))
