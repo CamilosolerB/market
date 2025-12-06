@@ -3,14 +3,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
+{% load static %}
+    
 
 {% block title %}
 <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
-    <div class="sidebar-brand-icon rotate-n-15">
-        <i class="fas fa-laugh-wink"></i>
-    </div>
-    <div class="sidebar-brand-text mx-3">Pedidos Ok</div>
+    <img src="{% static 'img/TAOX.jpg' %}" alt="Logo" class="w-100">
 </a>
 {% endblock %}
 
@@ -35,6 +33,13 @@
         <i class="fa-solid fa-truck"></i> Proveedores
     </a>
 </li>
+
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/general/">
+        <i class="fa-solid fa-truck"></i> General
+    </a>
+</li>
+
 <li class="nav-item">
     <a class="nav-link collapsed" href="/admin/bodega/">
         <i class="fa-solid fa-boxes-stacked"></i> Bodega
@@ -104,7 +109,7 @@
         <label for="proveedorPrincipal">Proveedor Principal</label>
         <select name="proveedorPrincipal" id="proveedorPrincipal" class="form-select" required>
             <option value="" disabled selected>Seleccione...</option>
-            {% for p in providers %}
+            {% for p in proveedor %}
                 <option value="{{p.nitProvider}}">{{p.nomProvider}}</option>
             {% endfor %}
         </select>
@@ -112,7 +117,7 @@
         <label for="proveedorSuplente">Proveedor Suplente</label>
         <select name="proveedorSuplente" id="proveedorSuplente" class="form-select">
             <option value="" selected>Seleccione...</option>
-            {% for p in providers %}
+            {% for p in proveedor %}
                 <option value="{{p.nitProvider}}">{{p.nomProvider}}</option>
             {% endfor %}
         </select>
@@ -120,7 +125,7 @@
         <label for="proveedor3">Proveedor 3</label>
         <select name="proveedor3" id="proveedor3" class="form-select">
             <option value="" selected>Seleccione...</option>
-            {% for p in providers %}
+            {% for p in proveedor %}
                 <option value="{{p.nitProvider}}">{{p.nomProvider}}</option>
             {% endfor %}
         </select>
@@ -128,7 +133,7 @@
         <label for="proveedor4">Proveedor 4</label>
         <select name="proveedor4" id="proveedor4" class="form-select">
             <option value="" selected>Seleccione...</option>
-            {% for p in providers %}
+            {% for p in proveedor %}
                 <option value="{{p.nitProvider}}">{{p.nomProvider}}</option>
             {% endfor %}
         </select>
@@ -170,7 +175,7 @@
             <tr>
                 <td>{{ data.idProducto }}</td>
                 <td>{{ data.nombreProducto }}</td>
-                <td>{{ data.nombreGenerico }}</td>
+        <td>{{ data.nombreGenerico }}</td>
                 <td>{{ data.stockProducto }}</td>
                 <td>{{ data.unidadMedida }}</td>
                 <td>{{ data.ubicacion }}</td>

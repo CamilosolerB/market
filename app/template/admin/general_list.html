@@ -1,0 +1,227 @@
+{% extends 'dashboard.html' %}
+
+{% block title %}
+<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/">
+    <div class="sidebar-brand-icon rotate-n-15">
+        <i class="fas fa-laugh-wink"></i>
+    </div>
+    <div class="sidebar-brand-text mx-3">Vista General</div>
+</a>
+{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="/admin/">
+        <i class="fa-solid fa-cart-shopping"></i> Producto
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/admins/">
+        <i class="fa-solid fa-user-tie"></i> Administradores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/storage/">
+        <i class="fa-solid fa-warehouse"></i> Almacén
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/providers/">
+        <i class="fa-solid fa-truck"></i> Proveedores
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed active" href="/admin/general/">
+        <i class="fa-solid fa-layer-group"></i> General
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/bodega/">
+        <i class="fa-solid fa-boxes-stacked"></i> Bodega
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/clientes/">
+        <i class="fa-solid fa-users"></i> Clientes
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link collapsed" href="/admin/qrpage/">
+        <i class="fa-solid fa-qrcode"></i> QR
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Vista General del Sistema</h1>
+
+<div class="d-flex justify-content-end mb-3">
+  <form action="/admin/importar/" method="post" enctype="multipart/form-data" class="d-flex">
+    {% csrf_token %}
+    <input type="file" name="archivo_excel" accept=".xlsx" class="form-control me-2" required>
+    <button type="submit" class="btn btn-success">
+      <i class="fas fa-file-import"></i> Importar Excel
+    </button>
+  </form>
+</div>
+
+<div class="table-responsive"> <!-- Bootstrap responsive wrapper -->
+  <table class="table table-bordered table-striped table-hover table-sm w-100" id="generalTable">
+      <thead class="table-dark text-center">
+          <tr>
+              <th>Tipo</th>
+              <th>ID / Código</th>
+              <th>Nombre / Descripción</th>
+              <th>Campo 1</th>
+              <th>Campo 2</th>
+              <th>Campo 3</th>
+              <th>Campo 4</th>
+              <th>Campo 5</th>
+              <th>Campo 6</th>
+              <th>Campo 7</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for p in productos %}
+          <tr>
+              <td><b>Producto</b></td>
+              <td class="text-center">{{ p.idProducto }}</td>
+              <td>{{ p.nombreProducto }}</td>
+              <td>{{ p.nombreGenerico }}</td>
+              <td class="text-end">{{ p.stockProducto }}</td>
+              <td>{{ p.unidadMedida }}</td>
+              <td>{{ p.ubicacion }}</td>
+              <td class="text-end">{{ p.cantAdquirida }}</td>
+              <td>{% if p.proveedorPrincipal %}{{ p.proveedorPrincipal.nombre|default:"" }}{% endif %}</td>
+              <td>{% if p.proveedorSuplente %}{{ p.proveedorSuplente.nombre|default:"" }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+
+          {% for pr in proveedores %}
+          <tr>
+              <td><b>Proveedor</b></td>
+              <td class="text-center">{{ pr.nit }}</td>
+              <td>{{ pr.nombre }}</td>
+              <td>{{ pr.contacto }}</td>
+              <td>{{ pr.direccion }}</td>
+              <td class="text-center">{{ pr.telefono }}</td>
+              <td class="text-center">{{ pr.celular }}</td>
+              <td>{{ pr.web }}</td>
+              <td>{{ pr.correo }}</td>
+              <td>{{ pr.codigoMat }}</td>
+          </tr>
+          {% endfor %}
+
+          {% for c in clientes %}
+          <tr>
+              <td><b>Cliente</b></td>
+              <td class="text-center">{{ c.codigo }}</td>
+              <td>{{ c.nombre }}</td>
+              <td>{{ c.razon_social }}</td>
+              <td class="text-center">{{ c.telefono }}</td>
+              <td>{{ c.correo }}</td>
+              <td>{{ c.ciudad }}</td>
+              <td>{{ c.tipo_agua }}</td>
+              <td class="text-end">{{ c.cantidad_promedio_kg }}</td>
+              <td></td>
+          </tr>
+          {% endfor %}
+
+          {% for b in bodegas %}
+          <tr>
+              <td><b>Bodega</b></td>
+              <td class="text-center">{{ b.codigo }}</td>
+              <td>{{ b.descripcion }}</td>
+              <td>{{ b.ubicacion }}</td>
+              <td class="text-center">{{ b.nivel }}</td>
+              <td class="text-center">{{ b.posicion }}</td>
+              <td>{{ b.localizador }}</td>
+              <td class="text-end">{{ b.cantidad }}</td>
+              <td>{{ b.unidad }}</td>
+              <td></td>
+          </tr>
+          {% endfor %}
+
+          {% for u in usuarios %}
+          <tr>
+              <td><b>Usuario</b></td>
+              <td class="text-center">{{ u.idCajero }}</td>
+              <td>{{ u.nombreCajero }}</td>
+              <td>{{ u.correo }}</td>
+              <td class="text-end">{{ u.salario }}</td>
+              <td class="text-end">{{ u.totalEarning }}</td>
+              <td>Cajero</td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </tr>
+          {% endfor %}
+
+          {% for s in almacen %}
+          <tr>
+              <td><b>Item Almacén</b></td>
+              <td class="text-center">{{ s.idItem }}</td>
+              <td>{{ s.item_name }}</td>
+              <td class="text-end">{{ s.quantity }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </tr>
+          {% endfor %}
+
+          {% for a in admins %}
+          <tr>
+              <td><b>Administrador</b></td>
+              <td class="text-center">{{ a.id }}</td>
+              <td>{{ a.email }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </tr>
+          {% endfor %}
+
+          {% for st in estadisticas %}
+          <tr>
+              <td><b>Estadísticas</b></td>
+              <td class="text-center">{{ st.id }}</td>
+              <td>Resumen</td>
+              <td class="text-end">S1: {{ st.sellsOneWeek }}</td>
+              <td class="text-end">S2: {{ st.sellsTwoWeek }}</td>
+              <td class="text-end">S3: {{ st.sellsThreeWeek }}</td>
+              <td class="text-end">S4: {{ st.sellsFourWeek }}</td>
+              <td>{{ st.nequi }}</td>
+              <td>{{ st.daviplata }}</td>
+              <td></td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<!-- SCRIPTS -->
+{% block extra_scripts %}
+<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#generalTable').DataTable({
+        pageLength: 25,
+        responsive: false,   // no subtablas responsive
+        autoWidth: false,
+        scrollX: true,       // permitir scroll horizontal en lugar de subtablas
+        language: { url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

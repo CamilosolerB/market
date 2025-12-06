@@ -24,8 +24,8 @@ class Proveedor(models.Model):
 
 class Producto(models.Model):
     idProducto = models.AutoField(primary_key=True)
-    nombreProducto = models.CharField(max_length=200)
-    nombreGenerico = models.CharField(max_length=200, blank=True, null=True)
+    nombreProducto = models.CharField(max_length=250)
+    nombreGenerico = models.CharField(max_length=250, blank=True, null=True)
     stockProducto = models.IntegerField(default=0)
     unidadMedida = models.CharField(max_length=50)  
     ubicacion = models.CharField(max_length=100, blank=True, null=True)

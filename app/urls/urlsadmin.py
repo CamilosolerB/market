@@ -38,4 +38,8 @@ urlpatterns = [
     path('generate_excel/',view_admin.generate_excel_product),
     path('generate_pdf/',view_admin.generate_pdf_product),
 
+    path("importar/", view_admin.importar_excel, name="importar_excel"),
+    path('general/', view_admin.vista_general, name='vista_general'),
+
+
 ]

@@ -13,11 +13,357 @@ from django.db import IntegrityError
 from django.shortcuts import render, redirect
 from app.forms import Cliente
 from app.models import Cliente 
+from app.models import Producto, Proveedor, Cliente, Bodega, Usuario, StorageItem, admin, stats
+import pandas as pd
 
 
 from .. import models
 
+def vista_general(request):
+    # traer datos ordenados y usar select_related para relaciones en productos
+    data = {
+        "productos": Producto.objects.select_related(
+            'proveedorPrincipal', 'proveedorSuplente', 'proveedor3', 'proveedor4'
+        ).all().order_by('idProducto'),
+        "proveedores": Proveedor.objects.all().order_by('nit'),
+        "clientes": Cliente.objects.all().order_by('codigo'),
+        "bodegas": Bodega.objects.all().order_by('codigo'),
+        "usuarios": Usuario.objects.all().order_by('idCajero'),
+        "almacen": StorageItem.objects.all().order_by('idItem'),
+        "admins": admin.objects.all().order_by('id'),
+        "estadisticas": stats.objects.all(),
+    }
+    return render(request, "admin/general_list.html", data)
 
+def importar_excel(request):
+    """
+    Importa un archivo Excel detectando el tipo de datos por encabezados.
+    Soporta columnas con nombres variantes (aliases) y mapea a los campos
+    de los modelos: Producto, Proveedor, Cliente, Bodega, Usuario, StorageItem, admin, stats.
+    """
+    if request.method == "POST" and request.FILES.get("archivo_excel"):
+        archivo = request.FILES["archivo_excel"]
+
+        try:
+            import pandas as pd
+            from django.db import transaction
+
+            df = pd.read_excel(archivo)
+            if df.empty:
+                messages.warning(request, "El archivo está vacío.")
+                return redirect("vista_general")
+
+            # Normalizar headers -> mapa de normalized -> original
+            def norm(s):
+                return str(s).strip().lower().replace(" ", "").replace("_", "").replace("-", "")
+
+            header_map = {norm(h): h for h in df.columns}
+
+            # Alias maps: normalized header alias -> modelo_field
+            PRODUCT_MAP = {
+                "id": "idProducto", "idproducto": "idProducto",
+                "nombre": "nombreProducto", "nombreproducto": "nombreProducto",
+                "nombregenerico": "nombreGenerico", "stock": "stockProducto", "stockproducto": "stockProducto",
+                "unidadmedida": "unidadMedida", "ubicacion": "ubicacion", "cantadquirida": "cantAdquirida",
+                "proveedorprincipal": "proveedorPrincipal", "proveedorsprincipal": "proveedorPrincipal",
+                "proveedorsuplente": "proveedorSuplente", "proveedor3": "proveedor3", "proveedor4": "proveedor4",
+            }
+
+            PROVIDER_MAP = {
+                "nit": "nit", "nombre": "nombre", "contacto": "contacto", "direccion": "direccion",
+                "telefono": "telefono", "celular": "celular", "web": "web", "correo": "correo",
+                "codigomat": "codigoMat", "nombreproducto": "nombreProducto", "precio": "precio",
+                "unidadmedida": "unidadMedida", "unidadcompra": "unidadCompra", "unidadmincompra": "unidadMinCompra",
+                "leadtime": "leadTimeDias", "leadtimedias": "leadTimeDias", "mediotransporte": "medioTransporte",
+                "reabastecimiento": "reabastecimiento", "terminopago": "terminoPago", "tiempocreditodias": "tiempoCreditoDias"
+            }
+
+            CLIENT_MAP = {
+                "codigo": "codigo", "nombre": "nombre", "razonsocial": "razon_social",
+                "telefono": "telefono", "contacto": "contacto", "correo": "correo",
+                "ciudad": "ciudad", "tipoagua": "tipo_agua", "cantidadpromediokg": "cantidad_promedio_kg"
+            }
+
+            BODEGA_MAP = {
+                "codigo": "codigo", "descripcion": "descripcion", "ubicacion": "ubicacion",
+                "nivel": "nivel", "posicion": "posicion", "localizador": "localizador",
+                "cantidad": "cantidad", "unidad": "unidad"
+            }
+
+            USUARIO_MAP = {
+                "idcajero": "idCajero", "nombrecajero": "nombreCajero", "correo": "correo",
+                "salario": "salario", "totalearning": "totalEarning", "password": "password"
+            }
+
+            STORAGE_MAP = {
+                "iditem": "idItem", "itemname": "item_name", "item_name": "item_name",
+                "quantity": "quantity", "cantidad": "quantity"
+            }
+
+            ADMIN_MAP = {
+                "id": "id", "email": "email", "password": "password"
+            }
+
+            STATS_MAP = {
+                "id": "id", "sellsoneweek": "sellsOneWeek", "sellstwoweek": "sellsTwoWeek",
+                "sellsthreeweek": "sellsThreeWeek", "sellsfourweek": "sellsFourWeek",
+                "nequi": "nequi", "daviplata": "daviplata"
+            }
+
+            model_maps = [
+                ("Producto", PRODUCT_MAP, Producto),
+                ("Proveedor", PROVIDER_MAP, Proveedor),
+                ("Cliente", CLIENT_MAP, Cliente),
+                ("Bodega", BODEGA_MAP, Bodega),
+                ("Usuario", USUARIO_MAP, Usuario),
+                ("StorageItem", STORAGE_MAP, StorageItem),
+                ("admin", ADMIN_MAP, admin),
+                ("stats", STATS_MAP, stats),
+            ]
+
+            # Detectar mejor candidato por cantidad de coincidencias de headers
+            best = None
+            best_count = 0
+            for name, amap, model in model_maps:
+                count = sum(1 for a in amap.keys() if a in header_map)
+                if count > best_count:
+                    best_count = count
+                    best = (name, amap, model)
+            # Require at least 2 matches to be confident (ajustable)
+            if not best or best_count < 1:
+                messages.warning(request, "No se pudo identificar el tipo de datos del Excel.")
+                return redirect("vista_general")
+
+            model_name, alias_map, model_class = best
+
+            created = 0
+            updated = 0
+
+            with transaction.atomic():
+                for _, row in df.iterrows():
+                    # construir kwargs mapeando desde alias_map
+                    kwargs = {}
+                    fk_kwargs = {}  # para relaciones especiales
+                    for alias_norm, field in alias_map.items():
+                        if alias_norm in header_map:
+                            raw_val = row[header_map[alias_norm]]
+                            # normalizar NaN
+                            if pd.isna(raw_val):
+                                raw_val = None
+                            # tratar casos especiales: foreign keys / tipos numéricos
+                            if field in ("proveedorPrincipal", "proveedorSuplente", "proveedor3", "proveedor4"):
+                                # buscar proveedor por nit o por nombre
+                                if raw_val:
+                                    prov = Proveedor.objects.filter(nit=str(raw_val)).first() or Proveedor.objects.filter(nombre=str(raw_val)).first()
+                                    fk_kwargs[field] = prov
+                                else:
+                                    fk_kwargs[field] = None
+                            else:
+                                kwargs[field] = raw_val
+
+                    # Operar según modelo
+                    if model_name == "Producto":
+                        # si viene id (pk) intentar update
+                        pk = kwargs.get("idProducto") or kwargs.get("id")
+                        if pk:
+                            try:
+                                obj = Producto.objects.get(idProducto=int(pk))
+                                for k, v in kwargs.items():
+                                    if k == "id" or k == "idProducto":
+                                        continue
+                                    setattr(obj, k, v)
+                                for k, v in fk_kwargs.items():
+                                    setattr(obj, k, v)
+                                obj.save()
+                                updated += 1
+                            except Producto.DoesNotExist:
+                                obj = Producto.objects.create(
+                                    nombreProducto=kwargs.get("nombreProducto", ""),
+                                    nombreGenerico=kwargs.get("nombreGenerico"),
+                                    stockProducto=int(kwargs.get("stockProducto") or 0),
+                                    unidadMedida=kwargs.get("unidadMeida") or kwargs.get("unidadMedida") or "",
+                                    ubicacion=kwargs.get("ubicacion"),
+                                    cantAdquirida=int(kwargs.get("cantAdquirida") or 0),
+                                    proveedorPrincipal=fk_kwargs.get("proveedorPrincipal"),
+                                    proveedorSuplente=fk_kwargs.get("proveedorSuplente"),
+                                    proveedor3=fk_kwargs.get("proveedor3"),
+                                    proveedor4=fk_kwargs.get("proveedor4"),
+                                )
+                                created += 1
+                        else:
+                            obj = Producto.objects.create(
+                                nombreProducto=kwargs.get("nombreProducto", ""),
+                                nombreGenerico=kwargs.get("nombreGenerico"),
+                                stockProducto=int(kwargs.get("stockProducto") or 0),
+                                unidadMedida=kwargs.get("unidadMedida") or "",
+                                ubicacion=kwargs.get("ubicacion"),
+                                cantAdquirida=int(kwargs.get("cantAdquirida") or 0),
+                                proveedorPrincipal=fk_kwargs.get("proveedorPrincipal"),
+                                proveedorSuplente=fk_kwargs.get("proveedorSuplente"),
+                                proveedor3=fk_kwargs.get("proveedor3"),
+                                proveedor4=fk_kwargs.get("proveedor4"),
+                            )
+                            created += 1
+
+                    elif model_name == "Proveedor":
+                        pk = kwargs.get("nit")
+                        if pk and Proveedor.objects.filter(nit=str(pk)).exists():
+                            prov = Proveedor.objects.get(nit=str(pk))
+                            for k, v in kwargs.items():
+                                setattr(prov, k, v)
+                            prov.save()
+                            updated += 1
+                        else:
+                            Proveedor.objects.create(
+                                nit=str(kwargs.get("nit") or ""),
+                                nombre=kwargs.get("nombre") or "",
+                                contacto=kwargs.get("contacto"),
+                                direccion=kwargs.get("direccion"),
+                                telefono=kwargs.get("telefono"),
+                                celular=kwargs.get("celular"),
+                                web=kwargs.get("web"),
+                                correo=kwargs.get("correo"),
+                                codigoMat=kwargs.get("codigoMat"),
+                                nombreProducto=kwargs.get("nombreProducto"),
+                                precio=kwargs.get("precio"),
+                                unidadMedida=kwargs.get("unidadMedida"),
+                                unidadCompra=kwargs.get("unidadCompra"),
+                                unidadMinCompra=kwargs.get("unidadMinCompra"),
+                                leadTimeDias=kwargs.get("leadTimeDias"),
+                                medioTransporte=kwargs.get("medioTransporte"),
+                                reabastecimiento=kwargs.get("reabastecimiento"),
+                                terminoPago=kwargs.get("terminoPago"),
+                                tiempoCreditoDias=kwargs.get("tiempoCreditoDias")
+                            )
+                            created += 1
+
+                    elif model_name == "Cliente":
+                        pk = kwargs.get("codigo")
+                        if pk and Cliente.objects.filter(codigo=str(pk)).exists():
+                            cli = Cliente.objects.get(codigo=str(pk))
+                            for k, v in kwargs.items():
+                                setattr(cli, k, v)
+                            cli.save()
+                            updated += 1
+                        else:
+                            Cliente.objects.create(
+                                codigo=str(kwargs.get("codigo") or ""),
+                                nombre=kwargs.get("nombre") or "",
+                                razon_social=kwargs.get("razon_social"),
+                                telefono=kwargs.get("telefono"),
+                                contacto=kwargs.get("contacto"),
+                                correo=kwargs.get("correo"),
+                                ciudad=kwargs.get("ciudad"),
+                                tipo_agua=kwargs.get("tipo_agua"),
+                                cantidad_promedio_kg=kwargs.get("cantidad_promedio_kg")
+                            )
+                            created += 1
+
+                    elif model_name == "Bodega":
+                        pk = kwargs.get("codigo")
+                        if pk and Bodega.objects.filter(codigo=str(pk)).exists():
+                            b = Bodega.objects.get(codigo=str(pk))
+                            for k, v in kwargs.items():
+                                setattr(b, k, v)
+                            b.save()
+                            updated += 1
+                        else:
+                            Bodega.objects.create(
+                                codigo=str(kwargs.get("codigo") or ""),
+                                descripcion=kwargs.get("descripcion") or "",
+                                ubicacion=kwargs.get("ubicacion"),
+                                nivel=kwargs.get("nivel") or 0,
+                                posicion=kwargs.get("posicion") or 0,
+                                localizador=kwargs.get("localizador"),
+                                cantidad=kwargs.get("cantidad") or 0,
+                                unidad=kwargs.get("unidad") or ""
+                            )
+                            created += 1
+
+                    elif model_name == "Usuario":
+                        correo = kwargs.get("correo")
+                        if correo and Usuario.objects.filter(correo=str(correo)).exists():
+                            u = Usuario.objects.get(correo=str(correo))
+                            for k, v in kwargs.items():
+                                if k == "salario" and v is not None:
+                                    try:
+                                        v = float(v)
+                                    except:
+                                        v = u.salario
+                                setattr(u, k, v)
+                            u.save()
+                            updated += 1
+                        else:
+                            Usuario.objects.create(
+                                nombreCajero=kwargs.get("nombreCajero") or "",
+                                correo=kwargs.get("correo") or "",
+                                password=kwargs.get("password") or "",
+                                salario=float(kwargs.get("salario") or 0),
+                                totalEarning=float(kwargs.get("totalEarning") or 0)
+                            )
+                            created += 1
+
+                    elif model_name == "StorageItem":
+                        name = kwargs.get("item_name") or kwargs.get("itemname")
+                        if name and StorageItem.objects.filter(item_name=str(name)).exists():
+                            it = StorageItem.objects.get(item_name=str(name))
+                            it.quantity = int(kwargs.get("quantity") or it.quantity)
+                            it.save()
+                            updated += 1
+                        else:
+                            StorageItem.objects.create(
+                                item_name=str(name or ""),
+                                quantity=int(kwargs.get("quantity") or 0)
+                            )
+                            created += 1
+
+                    elif model_name == "admin":
+                        correo = kwargs.get("email")
+                        if correo and admin.objects.filter(email=str(correo)).exists():
+                            ad = admin.objects.get(email=str(correo))
+                            ad.password = kwargs.get("password") or ad.password
+                            ad.save()
+                            updated += 1
+                        else:
+                            admin.objects.create(
+                                email=kwargs.get("email") or "",
+                                password=kwargs.get("password") or ""
+                            )
+                            created += 1
+
+                    elif model_name == "stats":
+                        pk = kwargs.get("id")
+                        if pk:
+                            s = stats.objects.filter(id=int(pk)).first()
+                            if s:
+                                for k, v in kwargs.items():
+                                    setattr(s, k, v)
+                                s.save()
+                                updated += 1
+                            else:
+                                stats.objects.create(
+                                    id=int(kwargs.get("id")),
+                                    sellsOneWeek=float(kwargs.get("sellsOneWeek") or 0),
+                                    sellsTwoWeek=float(kwargs.get("sellsTwoWeek") or 0),
+                                    sellsThreeWeek=float(kwargs.get("sellsThreeWeek") or 0),
+                                    sellsFourWeek=float(kwargs.get("sellsFourWeek") or 0),
+                                    nequi=kwargs.get("nequi") or "",
+                                    daviplata=kwargs.get("daviplata") or ""
+                                )
+                                created += 1
+                        else:
+                            # sin id, crear con id autogenerado no es posible -> saltar
+                            continue
+
+            messages.success(request, f"Importación finalizada. {created} creados, {updated} actualizados.")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messages.error(request, f"Error al importar: {e}")
+
+        return redirect("vista_general")
+
+    return render(request, "./admin/general_list.html")
 
 # --- PÁGINAS PRINCIPALES ---
 def home_page_admin(request):

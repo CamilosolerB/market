@@ -62,7 +62,7 @@ def login_validation(request):
 
         # Verificar si es admin
         try:
-            admin = models.admin.objects.get(email=post.get('email'))
+            admin = models.admin.objects.get(email=email)
             print(admin.password)
             if check_password(password, admin.password):
                 request.session['id'] = admin.id
