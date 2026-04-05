@@ -1,51 +1,78 @@
-# Pedidos Ok
+# market
 
-**Proceso de instalacion del Software**
+## Descripción General
 
-Para este proceso se requiere tener las siguientes aplicaciones.
+`market` es una aplicación web de comercio electrónico o mercado, desarrollada principalmente con Python (Django) y que integra tecnologías frontend como HTML, CSS y JavaScript. El proyecto demuestra una solución completa para la gestión de productos, usuarios y transacciones.
 
--   Git
+## Características Principales
 
--   Python (preferiblemente entre las versiones 3.7 a 3.11)
+*   **Gestión de Productos:** Funcionalidades para añadir, editar y eliminar productos.
+*   **Gestión de Usuarios:** Registro, autenticación y perfiles de usuario.
+*   **Carrito de Compras:** Funcionalidad para añadir productos al carrito y gestionar pedidos.
+*   **Base de Datos:** Persistencia de datos para productos, usuarios y pedidos.
+*   **Automatización de Despliegue:** Script `build.sh` para la configuración y despliegue de la aplicación.
 
-Lo primero es hacer un clone del proyecto desde la terminal
-~~~
-  git clone https://github.com/CamilosolerB/market.git
-~~~
-Tienes que tener instalado python y la libreria virtualenv, entras con vs code, abres una terminal en vscode y ejecutas
-~~~
-  ./myenv/Script/activate
-~~~
-Si sale algun problema con politicas ejecuta desde powershell como administrador
-~~~
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-~~~
+## Tecnologías Utilizadas
 
-Esto hara que se instale todas las dependencias (antes de ejecutar esta
-accion se debe tener instalado python)
+*   **Python** (Framework: Django)
+*   **HTML, CSS, JavaScript:** Para el desarrollo frontend.
+*   **SQLite:** Base de datos por defecto (`db.sqlite3`).
+*   **Shell Scripting:** Para automatización de tareas de construcción y despliegue (`build.sh`).
+*   **psycopg2-binary:** Indica posible uso de PostgreSQL en entornos de producción.
 
-finalmente, corremos el siguiente comando en la terminal donde se viene
-trabajando
-~~~
-  python3 manage.py runserver
-~~~
-De esta manera se ejecuta el proyecto en su entorno local por lo cual
-desde cualquier navegador web ingresamos a la siguiente url:
-~~~
-  localhost:8000/
-~~~
+## Instalación y Configuración
 
-los usuarios de acceso para el software inicialmente son:
+Para configurar y ejecutar el proyecto localmente, sigue los siguientes pasos:
 
-Administrador:
-~~~
-  correo: caansobu2@gmail.com
+1.  **Clonar el repositorio:**
 
-  clave: 1234
-~~~
-Cajero:
-~~~
-  correo: camilosolerbu@gmail.com
+    ```bash
+    git clone https://github.com/CamilosolerB/market.git
+    cd market
+    ```
 
-  clave: 1234
-~~~
+2.  **Crear y activar un entorno virtual:**
+
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # En Linux/macOS
+    # venv\Scripts\activate   # En Windows
+    ```
+
+3.  **Instalar dependencias:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Ejecutar el script de construcción/despliegue:**
+
+    El proyecto incluye un script `build.sh` que se encarga de instalar dependencias, recolectar archivos estáticos y aplicar migraciones de base de datos.
+
+    ```bash
+    ./build.sh
+    ```
+
+5.  **Iniciar el servidor de desarrollo:**
+
+    ```bash
+    python manage.py runserver
+    ```
+
+    La aplicación estará disponible en `http://127.0.0.1:8000`.
+
+## Credenciales de Acceso (Iniciales)
+
+Para acceder al software, se proporcionan las siguientes credenciales iniciales:
+
+**Administrador:**
+*   **Correo:** `caansobu2@gmail.com`
+*   **Clave:** `1234`
+
+**Cajero:**
+*   **Correo:** `camilosolerbu@gmail.com`
+*   **Clave:** `1234`
+
+## Contribución
+
+Las contribuciones son bienvenidas. Por favor, abre un *issue* o *pull request* con tus sugerencias o mejoras.
